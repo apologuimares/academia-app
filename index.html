@@ -141,6 +141,28 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:
 .ws-val{font-family:var(--mo);font-size:1.35rem;font-weight:800}
 .ws-lbl{font-size:.63rem;color:var(--tx2);letter-spacing:.04em;margin-top:2px;text-transform:uppercase}
 .ws-diff{font-family:var(--mo);font-size:.68rem;margin-top:5px}
+.goal-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.goal-lbl{font-size:.72rem;color:var(--tx2);min-width:80px}
+.goal-bar-wrap{flex:1;height:6px;background:var(--bd);border-radius:3px;overflow:hidden}
+.goal-fill{height:100%;border-radius:3px;background:var(--ol);transition:width .3s}
+.goal-pct{font-family:var(--mo);font-size:.7rem;color:var(--tx2);min-width:44px;text-align:right}
+.med-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.med-inp{width:100%;padding:8px 10px;border-radius:8px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-family:var(--mo);font-size:.88rem;text-align:right}
+.med-lbl{font-size:.63rem;color:var(--tx2);font-weight:700;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.med-log-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);gap:8px}
+.med-log-row:last-child{border-bottom:none}
+.achv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.achv-item{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.achv-item.unlocked{border-color:var(--ol);background:rgba(107,158,82,.10)}
+.achv-item.locked .achv-icon{filter:grayscale(1);opacity:.35}
+.achv-item.locked .achv-nm,.achv-item.locked .achv-desc{color:var(--tx2)}
+.achv-icon{font-size:1.5rem;line-height:1}
+.achv-nm{font-size:.72rem;font-weight:800;line-height:1.2}
+.achv-desc{font-size:.62rem;color:var(--tx2);line-height:1.3}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}
+.sec-title{font-size:.88rem;font-weight:800}
+.btn-sm{padding:5px 12px;border-radius:7px;background:var(--sf);border:1px solid var(--bd);font-size:.72rem;font-weight:700;color:var(--tx2)}
+.exp-btn{width:100%;padding:12px;border-radius:10px;background:var(--sf);border:1px solid var(--bd);font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;color:var(--tx)}
 </style>
 </head>
 <body>
@@ -266,10 +288,11 @@ const P={
   body:'M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM7 9c-1.5 1-2 3-2 5l1 7h3l1-6h4l1 6h3l1-7c0-2-.5-4-2-5-1.5-1-3-1.5-5-1.5S8.5 8 7 9z',
   trash:'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6',
   arrowR:'M9 18l6-6-6-6',
+  download:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
 };
 const ico=(k,sz=18,col='currentColor')=>`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${P[k]}"/></svg>`;
 const chkSvg=(sz=15)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="#0E1318" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="${P.check}"/></svg>`;
-const S={tab:'painel',treinoDay:autoDay(),calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),muscWeek:mondayOf(new Date()),dietType:'treino',histEx:null,wInput:'',detailEx:null,detailDay:null};
+const S={tab:'painel',treinoDay:autoDay(),calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),muscWeek:mondayOf(new Date()),dietType:'treino',histEx:null,wInput:'',detailEx:null,detailDay:null,editingGoals:false};
 const TIMERS={};
 let detailTimer={rem:null,iid:null};
 // ── Som de alerta ──────────────────────────────────────────────
@@ -412,6 +435,63 @@ function buildBodySVG(counts,max,highlight){
 }
 const TABS=[{id:'painel',lb:'Painel',ic:'calendar'},{id:'treino',lb:'Treino',ic:'dumbbell'},{id:'musculos',lb:'Músculos',ic:'body'},{id:'dieta',lb:'Dieta',ic:'food'},{id:'progresso',lb:'Progresso',ic:'trend'}];
 function renderNav(){return TABS.map(t=>`<button class="bn${S.tab===t.id?' on':''}" data-tab="${t.id}"><span class="bn-ic">${ico(t.ic,20)}</span><span class="bn-lb">${t.lb}</span></button>`).join('');}
+// ── Medidas corporais ──────────────────────────────────────────────
+const MEDIDAS_CAMPOS=[
+  {id:'peitoral',lb:'Peitoral',un:'cm'},{id:'cintura',lb:'Cintura',un:'cm'},
+  {id:'quadril',lb:'Quadril',un:'cm'},{id:'bicep',lb:'Bícep',un:'cm'},
+  {id:'coxa',lb:'Coxa',un:'cm'},{id:'panturrilha',lb:'Panturrilha',un:'cm'},
+];
+function getLastMedidas(){const keys=DB.keys('medidas:').sort().reverse();return keys.length?{date:keys[0].slice(8),data:DB.get(keys[0])}:null;}
+
+// ── Metas semanais ─────────────────────────────────────────────────
+function getGoals(){return DB.get('goals')||{workouts:4,sets:40};}
+
+// ── Conquistas ─────────────────────────────────────────────────────
+const ACHVS=[
+  {id:'first_workout',icon:'🏋️',name:'Primeiro Treino',desc:'Complete 1 treino'},
+  {id:'first_pr',icon:'🏆',name:'Primeiro Recorde',desc:'Bata um PR'},
+  {id:'streak_1',icon:'🔥',name:'Em Chamas',desc:'1 semana seguida'},
+  {id:'streak_3',icon:'🌊',name:'Maré Alta',desc:'3 semanas seguidas'},
+  {id:'streak_5',icon:'🦁',name:'Leão',desc:'5 semanas seguidas'},
+  {id:'streak_10',icon:'👑',name:'Campeão',desc:'10 semanas seguidas'},
+  {id:'total_10',icon:'💪',name:'10 Treinos',desc:'10 treinos no total'},
+  {id:'total_50',icon:'⚡',name:'Máquina',desc:'50 treinos no total'},
+  {id:'sets_50week',icon:'🎯',name:'Semana Intensa',desc:'50 séries em 1 semana'},
+  {id:'goal_met',icon:'✅',name:'Meta Cumprida',desc:'Atinja a meta da semana'},
+];
+function calcAchievements(){
+  const u=new Set();
+  const days=new Set();
+  DB.keys('workout:').forEach(k=>{const p=k.split(':');if(p.length===3){const log=DB.get(k);if(log&&Object.values(log).some(e=>e?.done))days.add(p[1]);}});
+  if(days.size>=1)u.add('first_workout');
+  if(days.size>=10)u.add('total_10');
+  if(days.size>=50)u.add('total_50');
+  if(DB.keys('pr:').length>0)u.add('first_pr');
+  const sk=calcStreak();
+  if(sk>=1)u.add('streak_1');if(sk>=3)u.add('streak_3');if(sk>=5)u.add('streak_5');if(sk>=10)u.add('streak_10');
+  const ws=weeklyStats();
+  if(ws.cur.sets>=50)u.add('sets_50week');
+  if(ws.cur.workouts>=getGoals().workouts)u.add('goal_met');
+  return u;
+}
+
+// ── Exportação CSV ─────────────────────────────────────────────────
+function exportCSV(){
+  const rows=[['Data','Dia','Exercício','Série','Kg','Reps','Feito']];
+  DB.keys('workout:').sort().forEach(k=>{
+    const p=k.split(':');if(p.length!==3)return;
+    const[,date,dayId]=p;const log=DB.get(k);if(!log)return;
+    const day=DAYS.find(d=>d.id===dayId);
+    Object.entries(log).forEach(([exId,entry])=>{
+      const ex=(WORKOUTS[dayId]||[]).find(e=>e.id===exId);
+      if(entry?.sets){entry.sets.forEach((s,i)=>{rows.push([date,day?.lb||dayId,ex?.n||exId,i+1,s.kg||'',s.reps||'',s.done?'Sim':'Não']);});}
+      else if(entry?.done){rows.push([date,day?.lb||dayId,ex?.n||exId,1,entry.weight||'',entry.reps||'',entry.done?'Sim':'Não']);}
+    });
+  });
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);a.download='bulk-log-treinos.csv';document.body.appendChild(a);a.click();a.remove();
+}
+
 function renderPainel(){
   const{calYear:y,calMonth:m}=S;
   const monthName=new Date(y,m,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
@@ -428,7 +508,10 @@ function renderPainel(){
   const diff=(f,n)=>{if(!f&&!n)return'';const d=n-f;if(d===0)return`<div class="ws-diff" style="color:var(--tx2)">— igual</div>`;return`<div class="ws-diff" style="color:${d>0?'#6B9E52':'#C45A1A'}">${d>0?'▲':'▼'} ${Math.abs(d)} vs sem. ant.</div>`;};
   const streakHtml=`<div class="streak-card"><div class="streak-num">${sk}</div><div><div style="font-weight:700;font-size:.92rem">${sk===1?'1 semana seguida':''+sk+' semanas seguidas'} 🔥</div><div style="font-size:.7rem;color:var(--tx2);margin-top:3px">${sk===0?'Comece um treino esta semana!':'Não perca o ritmo!'}</div></div></div>`;
   const wsHtml=`<div class="ws-grid"><div class="ws-card"><div class="ws-val">${ws2.cur.workouts}</div><div class="ws-lbl">Treinos esta semana</div>${diff(ws2.prev.workouts,ws2.cur.workouts)}</div><div class="ws-card"><div class="ws-val">${ws2.cur.sets}</div><div class="ws-lbl">Séries esta semana</div>${diff(ws2.prev.sets,ws2.cur.sets)}</div></div>`;
-  return`${streakHtml}${wsHtml}<div class="nav-row"><button data-cal-prev>${ico('chevL',22,'#C45A1A')}</button><h2>${monthName}</h2><button data-cal-next>${ico('chevR',22,'#C45A1A')}</button></div><div class="wlbls">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(w=>`<span class="wlbl">${w}</span>`).join('')}</div><div class="cgrid">${cells}</div><div class="legend"><div class="li"><div class="ld" style="background:#6B9E52"></div>100%</div><div class="li"><div class="ld" style="background:#C45A1A"></div>50-99%</div><div class="li"><div class="ld" style="background:#8C4012"></div>&lt;50%</div></div>`;
+  const goals=getGoals();const wPct=Math.min(100,(ws2.cur.workouts/goals.workouts)*100);const sPct=Math.min(100,(ws2.cur.sets/goals.sets)*100);
+  const goalsForm=S.editingGoals?`<div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end;flex-wrap:wrap"><div><div class="med-lbl">Treinos/sem</div><input id="gl-w" type="number" inputmode="numeric" class="cf-in" style="width:72px" value="${goals.workouts}"></div><div><div class="med-lbl">Séries/sem</div><input id="gl-s" type="number" inputmode="numeric" class="cf-in" style="width:80px" value="${goals.sets}"></div><button data-save-goals style="padding:7px 14px;border-radius:7px;background:var(--ol);color:#fff;font-size:.78rem;font-weight:700">Salvar</button></div>`:'';
+  const goalsHtml=`<div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:.82rem;font-weight:800">Metas Semanais</span><button data-edit-goals class="btn-sm">${S.editingGoals?'✕':'✎ Editar'}</button></div><div class="goal-row"><span class="goal-lbl">Treinos</span><div class="goal-bar-wrap"><div class="goal-fill" style="width:${wPct}%"></div></div><span class="goal-pct">${ws2.cur.workouts}/${goals.workouts}</span></div><div class="goal-row"><span class="goal-lbl">Séries</span><div class="goal-bar-wrap"><div class="goal-fill" style="width:${sPct}%;background:${sPct>=100?'var(--ol)':'#4A7AB8'}"></div></div><span class="goal-pct">${ws2.cur.sets}/${goals.sets}</span></div>${goalsForm}</div>`;
+  return`${streakHtml}${wsHtml}${goalsHtml}<div class="nav-row"><button data-cal-prev>${ico('chevL',22,'#C45A1A')}</button><h2>${monthName}</h2><button data-cal-next>${ico('chevR',22,'#C45A1A')}</button></div><div class="wlbls">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(w=>`<span class="wlbl">${w}</span>`).join('')}</div><div class="cgrid">${cells}</div><div class="legend"><div class="li"><div class="ld" style="background:#6B9E52"></div>100%</div><div class="li"><div class="ld" style="background:#C45A1A"></div>50-99%</div><div class="li"><div class="ld" style="background:#8C4012"></div>&lt;50%</div></div>`;
 }
 function renderTreino(){
   const dayId=S.treinoDay;const day=DAYS.find(d=>d.id===dayId);const exs=WORKOUTS[dayId];const skey=`workout:${todayISO()}:${dayId}`;const log=DB.get(skey)||{};const doneCount=exs.filter(e=>log[e.id]?.done).length;
@@ -467,7 +550,14 @@ function renderProgresso(){
   if(entries.length>0){const last=entries.slice(-14);const bars=last.map((e,i)=>{const h=((e.weight-minW)/range)*82+14;return`<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="width:70%;margin:0 auto;height:${h}%;background:${i===last.length-1?'#C45A1A':'#263040'};border-radius:3px 3px 0 0"></div></div>`;}).join('');chartHtml=`<div class="chart-wrap"><div class="chart-bars">${bars}</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-family:var(--mo);font-size:.67rem;color:var(--tx2)">${entries[Math.max(0,entries.length-14)].date.slice(5)}</span><span style="font-family:var(--mo);font-size:.67rem;color:var(--tx2)">${entries[entries.length-1].date.slice(5)}</span></div></div>`;}
   else{chartHtml=`<div class="card empty-s">${ico('trend',28,'#7A8898')}<p class="dim" style="font-size:.85rem;margin-top:8px">Nenhum registro ainda</p></div>`;}
   const logRows=[...entries].reverse().slice(0,8).map(e=>`<div class="wlog-row"><span class="wlog-date">${e.date}</span><span class="wlog-val mono">${e.weight} kg</span></div>`).join('');
-  return`<div style="padding:20px 0 14px"><div class="h2">Progresso</div><div class="sub">Peso corporal — ganho de massa</div></div><div class="w-row"><input class="w-in" id="w-input" type="number" inputmode="decimal" placeholder="Peso hoje (kg)" value="${S.wInput}"><button class="w-add" data-add-weight>${ico('plus',20,'#E8E4DC')}</button></div>${chartHtml}${logRows}`;
+  const lastMed=getLastMedidas();
+  const medInputs=MEDIDAS_CAMPOS.map(c=>`<div><div class="med-lbl">${c.lb} (${c.un})</div><input class="med-inp" id="mi-${c.id}" type="number" inputmode="decimal" placeholder="—" value="${lastMed?.data?.[c.id]||''}"></div>`).join('');
+  const medKeys=DB.keys('medidas:').sort().reverse();
+  const medLog=medKeys.slice(0,4).map(k=>{const d=DB.get(k);const flds=MEDIDAS_CAMPOS.filter(c=>d[c.id]).map(c=>`${c.lb}: ${d[c.id]}`).join(' · ');return`<div class="med-log-row"><span style="font-size:.72rem;color:var(--tx2);flex-shrink:0">${k.slice(8)}</span><span style="font-size:.68rem;flex:1;padding-left:8px;text-align:right;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${flds}</span></div>`;}).join('');
+  const medidasSection=`<div class="sec-head"><span class="sec-title">Medidas Corporais</span>${lastMed?`<span style="font-size:.68rem;color:var(--tx2)">${lastMed.date}</span>`:''}</div><div class="med-grid">${medInputs}</div><button data-save-medidas style="width:100%;padding:10px;border-radius:8px;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-weight:700;font-size:.82rem;margin-bottom:${medLog?'0':'14px'}">Salvar medidas</button>${medLog?`<div style="margin:6px 0 14px">${medLog}</div>`:''}`;
+  const unlocked=calcAchievements();
+  const achvsSection=`<div class="sec-head"><span class="sec-title">Conquistas</span><span style="font-size:.72rem;color:var(--tx2)">${unlocked.size}/${ACHVS.length}</span></div><div class="achv-grid">${ACHVS.map(a=>{const on=unlocked.has(a.id);return`<div class="achv-item${on?' unlocked':' locked'}"><div class="achv-icon">${a.icon}</div><div class="achv-nm">${a.name}</div><div class="achv-desc">${a.desc}</div></div>`;}).join('')}</div>`;
+  return`<div style="padding:20px 0 14px"><div class="h2">Progresso</div><div class="sub">Peso corporal — ganho de massa</div></div><div class="w-row"><input class="w-in" id="w-input" type="number" inputmode="decimal" placeholder="Peso hoje (kg)" value="${S.wInput}"><button class="w-add" data-add-weight>${ico('plus',20,'#E8E4DC')}</button></div>${chartHtml}${logRows}${medidasSection}${achvsSection}<button data-export-csv class="exp-btn">${ico('download',16,'#7A8898')} Exportar treinos (CSV)</button>`;
 }
 function renderContent(){switch(S.tab){case'painel':return renderPainel();case'treino':return renderTreino();case'musculos':return renderMusculos();case'dieta':return renderDieta();case'progresso':return renderProgresso();}}
 function mount(){document.getElementById('bnav').innerHTML=renderNav();document.getElementById('content').innerHTML=renderContent();}
@@ -513,6 +603,10 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-add-custom]')){const nm=document.getElementById('cf-nm')?.value.trim();const kcal=parseInt(document.getElementById('cf-kcal')?.value)||0;const prot=parseInt(document.getElementById('cf-prot')?.value)||0;if(!nm)return;const key=`diet-custom:${todayISO()}`;DB.set(key,[...(DB.get(key)||[]),{nm,kcal,prot}]);remountContent();return;}
   const dc2=t.closest('[data-del-custom]');if(dc2){const idx=parseInt(dc2.dataset.delCustom);const key=`diet-custom:${todayISO()}`;const list=DB.get(key)||[];list.splice(idx,1);DB.set(key,list);remountContent();return;}
   if(t.closest('[data-add-weight]')){const inp=document.getElementById('w-input');if(!inp)return;const val=parseFloat(inp.value.replace(',','.'));if(!val||val<=0)return;const entries=[...(DB.get('weight-log')||[]),{date:todayISO(),weight:val}].sort((a,b)=>a.date>b.date?1:-1);DB.set('weight-log',entries);S.wInput='';remountContent();return;}
+  if(t.closest('[data-save-medidas]')){const vals={};MEDIDAS_CAMPOS.forEach(c=>{const el=document.getElementById('mi-'+c.id);if(el&&el.value)vals[c.id]=parseFloat(el.value.replace(',','.'));});if(Object.keys(vals).length)DB.set('medidas:'+todayISO(),vals);remountContent();return;}
+  if(t.closest('[data-export-csv]')){exportCSV();return;}
+  if(t.closest('[data-edit-goals]')){S.editingGoals=!S.editingGoals;remountContent();return;}
+  if(t.closest('[data-save-goals]')){const w=parseInt(document.getElementById('gl-w')?.value)||4;const s=parseInt(document.getElementById('gl-s')?.value)||40;DB.set('goals',{workouts:Math.max(1,w),sets:Math.max(1,s)});S.editingGoals=false;remountContent();return;}
 });
 document.addEventListener('input',e=>{if(e.target.id==='w-input')S.wInput=e.target.value;});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-input')document.querySelector('[data-add-weight]')?.click();if(e.key==='Escape')closeDetail();});
