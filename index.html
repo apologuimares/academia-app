@@ -149,7 +149,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:
     <span class="ed-title" id="ed-exname"></span>
   </div>
   <div class="ed-body">
-    <div class="ed-musc-wrap" id="ed-body-svg"></div>
+    <div id="ed-media"></div>
     <div style="margin:16px 0 10px;display:flex;align-items:baseline;gap:8px">
       <span style="font-size:1rem;font-weight:800">Séries</span>
       <span id="ed-sets-done" style="font-family:var(--mo);font-size:.85rem;color:var(--tx2)"></span>
@@ -191,6 +191,24 @@ const EX_MUS={
   f1:['back'],f2:['back'],f3:['back'],f4:['hamstrings','back'],f5:['forearm'],f6:['biceps'],f7:['back'],f8:['back'],f9:['core'],f10:['core'],
 };
 const MLBL={chest:'Peitoral',shoulders:'Ombros',back:'Costas',biceps:'Bíceps',triceps:'Tríceps',forearm:'Antebraço',trapezius:'Trapézio',quads:'Quadríceps',hamstrings:'Posterior',glutes:'Glúteos',calves:'Panturrilha',core:'Core'};
+const _GB='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const EX_GIF={
+  m1:'Barbell_Bench_Press_-_Medium_Grip',m2:'Incline_Dumbbell_Press',m3:'Cable_Crossover',
+  m4:'Arnold_Dumbbell_Press',m5:'Side_Lateral_Raise',m6:'Front_Cable_Raise',
+  m7:'EZ-Bar_Skullcrusher',m8:'Triceps_Pushdown_-_V-Bar_Attachment',
+  t1:'Wide-Grip_Lat_Pulldown',t2:'Bent_Over_Barbell_Row',t3:'One_Arm_Lat_Pulldown',
+  t4:'Seated_Cable_Rows',t5:'Barbell_Shrug',t6:'Preacher_Curl',
+  t7:'Barbell_Curl',t8:'Alternate_Hammer_Curl',
+  w1:'Barbell_Hack_Squat',w2:'Leg_Press',w3:'Leg_Extensions',w4:'Romanian_Deadlift',
+  w5:'Lying_Leg_Curls',w6:'Barbell_Hip_Thrust',w7:'Standing_Calf_Raises',w8:'Seated_Calf_Raise',
+  h1:'Barbell_Incline_Bench_Press_-_Medium_Grip',h2:'Flat_Bench_Cable_Flyes',
+  h3:'Cable_Seated_Lateral_Raise',h4:'Cable_Rear_Delt_Fly',h5:'Barbell_Shrug',
+  h6:'EZ-Bar_Skullcrusher',h7:'Palms-Up_Barbell_Wrist_Curl_Over_A_Bench',
+  h8:'Dumbbell_Shoulder_Press',h9:'Incline_Dumbbell_Flyes',
+  f1:'Close-Grip_Front_Lat_Pulldown',f2:'V-Bar_Pulldown',f3:'Bent_Over_Two-Dumbbell_Row',
+  f4:'Barbell_Deadlift',f5:'Reverse_Cable_Curl',f6:'Incline_Dumbbell_Curl',
+  f7:'Elevated_Cable_Rows',f8:'One_Arm_Lat_Pulldown',f9:'Plank',f10:'Flat_Bench_Lying_Leg_Raise',
+};
 const DAY_TYPES=[
   {id:'treino',lb:'Treino',ic:'dumbbell',tgtKcal:2900,tgtProt:180},
   {id:'sabado',lb:'Sábado (vôlei)',ic:'volley',tgtKcal:3950,tgtProt:195},
@@ -247,78 +265,99 @@ const S={tab:'painel',treinoDay:autoDay(),calYear:new Date().getFullYear(),calMo
 const TIMERS={};
 let detailTimer={rem:null,iid:null};
 function muscColor(g,counts,max,highlight){
-  if(highlight)return highlight.includes(g)?'#E83020':'#1A2838';
+  if(highlight)return highlight.includes(g)?'#35CC60':'#1A2838';
   const n=counts[g]||0;if(!n)return '#1A2838';
   const t=Math.min(1,n/(max||1));
   if(t>0.75)return '#E42418';if(t>0.5)return '#D04030';if(t>0.25)return '#C07060';return '#C09888';
 }
 function bodyPaths(view,counts,max,highlight){
   const mc=g=>muscColor(g,counts,max,highlight);
-  const sk='#0A1018';const sw='stroke-width="0.7"';
-  const p=(g,d,op='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw}${op}/>`;
-  const rc=(g,x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2.5" fill="${mc(g)}" stroke="${sk}" ${sw}/>`;
-  if(view==='front')return`
-    ${p('trapezius','M 79 40 Q 58 47 38 57 L 53 65 Q 65 58 75 50 Z')}
-    ${p('trapezius','M 91 40 Q 112 47 132 57 L 117 65 Q 105 58 95 50 Z')}
-    ${p('shoulders','M 38 55 Q 20 63 15 80 Q 12 93 16 102 L 30 98 Q 28 84 33 73 Q 37 63 44 58 Z')}
-    ${p('shoulders','M 132 55 Q 150 63 155 80 Q 158 93 154 102 L 140 98 Q 142 84 137 73 Q 133 63 126 58 Z')}
-    ${p('chest','M 44 56 Q 28 67 24 83 Q 20 97 25 110 Q 31 120 44 122 L 83 122 L 83 56 Z')}
-    ${p('chest','M 126 56 Q 142 67 146 83 Q 150 97 145 110 Q 139 120 126 122 L 87 122 L 87 56 Z')}
-    ${p('biceps','M 15 100 Q 10 115 9 130 Q 8 145 12 153 L 27 150 Q 27 140 27 126 Q 27 110 27 100 Z')}
-    ${p('biceps','M 155 100 Q 160 115 161 130 Q 162 145 158 153 L 143 150 Q 143 140 143 126 Q 143 110 143 100 Z')}
-    ${p('forearm','M 12 153 Q 7 172 6 192 Q 5 208 10 218 L 25 220 Q 29 210 29 192 Q 29 172 27 153 Z')}
-    ${p('forearm','M 158 153 Q 163 172 164 192 Q 165 208 160 218 L 145 220 Q 141 210 141 192 Q 141 172 143 153 Z')}
-    <ellipse cx="17" cy="228" rx="9" ry="13" fill="${sk}"/>
-    <ellipse cx="153" cy="228" rx="9" ry="13" fill="${sk}"/>
-    ${rc('core',71,124,11,13)}${rc('core',88,124,11,13)}${rc('core',70,139,12,13)}${rc('core',88,139,12,13)}${rc('core',70,154,12,12)}${rc('core',88,154,12,12)}
-    ${p('core','M 56 122 Q 49 140 47 157 Q 45 170 50 178 Q 56 184 67 185 L 70 183 L 70 122 Z',' opacity="0.85"')}
-    ${p('core','M 114 122 Q 121 140 123 157 Q 125 170 120 178 Q 114 184 103 185 L 100 183 L 100 122 Z',' opacity="0.85"')}
-    ${p('quads','M 49 188 Q 42 213 40 240 Q 38 258 43 268 Q 50 276 64 278 L 84 278 Q 91 276 92 264 Q 94 247 92 220 L 88 188 Z')}
-    ${p('quads','M 121 188 Q 128 213 130 240 Q 132 258 127 268 Q 120 276 106 278 L 86 278 Q 79 276 78 264 Q 76 247 78 220 L 82 188 Z')}
-    ${p('calves','M 41 278 Q 36 294 35 308 Q 34 318 39 322 L 66 324 L 85 322 L 85 278 L 65 278 Z')}
-    ${p('calves','M 129 278 Q 134 294 135 308 Q 136 318 131 322 L 104 324 L 85 322 L 85 278 L 105 278 Z')}
-    <path d="M 34 320 Q 44 330 64 330 L 78 330 Q 87 326 85 320 L 34 320 Z" fill="${sk}"/>
-    <path d="M 136 320 Q 126 330 106 330 L 92 330 Q 83 326 85 320 L 136 320 Z" fill="${sk}"/>`;
-  return`
-    ${p('trapezius','M 79 40 Q 56 47 38 57 L 55 68 L 85 108 L 85 40 Z')}
-    ${p('trapezius','M 91 40 Q 114 47 132 57 L 115 68 L 85 108 L 85 40 Z')}
-    ${p('shoulders','M 38 55 Q 20 63 15 80 Q 12 93 16 102 L 30 98 Q 28 84 33 73 Q 37 63 44 58 Z')}
-    ${p('shoulders','M 132 55 Q 150 63 155 80 Q 158 93 154 102 L 140 98 Q 142 84 137 73 Q 133 63 126 58 Z')}
-    ${p('back','M 38 60 Q 24 83 20 109 Q 16 134 20 156 Q 26 172 42 180 L 66 186 L 66 112 Z')}
-    ${p('back','M 132 60 Q 146 83 150 109 Q 154 134 150 156 Q 144 172 128 180 L 104 186 L 104 112 Z')}
-    ${p('back','M 66 184 L 66 210 Q 68 222 75 228 L 85 230 L 95 228 Q 102 222 104 210 L 104 184 Z',' opacity="0.8"')}
-    ${p('triceps','M 15 100 Q 10 115 9 130 Q 8 145 12 153 L 27 150 Q 27 140 27 126 Q 27 110 27 100 Z')}
-    ${p('triceps','M 155 100 Q 160 115 161 130 Q 162 145 158 153 L 143 150 Q 143 140 143 126 Q 143 110 143 100 Z')}
-    ${p('forearm','M 12 153 Q 7 172 6 192 Q 5 208 10 218 L 25 220 Q 29 210 29 192 Q 29 172 27 153 Z')}
-    ${p('forearm','M 158 153 Q 163 172 164 192 Q 165 208 160 218 L 145 220 Q 141 210 141 192 Q 141 172 143 153 Z')}
-    <ellipse cx="17" cy="228" rx="9" ry="13" fill="${sk}"/>
-    <ellipse cx="153" cy="228" rx="9" ry="13" fill="${sk}"/>
-    ${p('glutes','M 47 228 Q 40 243 40 257 Q 40 270 49 276 Q 60 282 76 282 L 85 282 L 85 228 Z')}
-    ${p('glutes','M 123 228 Q 130 243 130 257 Q 130 270 121 276 Q 110 282 94 282 L 85 282 L 85 228 Z')}
-    ${p('hamstrings','M 45 282 Q 39 300 38 314 Q 37 325 43 329 L 65 331 L 85 329 L 85 282 L 75 282 Z')}
-    ${p('hamstrings','M 125 282 Q 131 300 132 314 Q 133 325 127 329 L 105 331 L 85 329 L 85 282 L 95 282 Z')}
-    ${p('calves','M 40 329 Q 35 344 35 356 Q 34 364 40 367 L 63 369 L 82 367 Q 86 360 85 345 L 83 329 L 63 331 Z')}
-    ${p('calves','M 130 329 Q 135 344 135 356 Q 136 364 130 367 L 107 369 L 88 367 Q 84 360 85 345 L 87 329 L 107 331 Z')}
-    <path d="M 33 365 Q 45 375 64 375 L 79 375 Q 87 371 84 364 L 33 364 Z" fill="${sk}"/>
-    <path d="M 137 365 Q 125 375 106 375 L 91 375 Q 83 371 86 364 L 137 364 Z" fill="${sk}"/>`;
+  const sk='#060E18';const base='#18293A';
+  const sw='stroke-width="0.65"';
+  const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x}/>`;
+  const hl=g=>(highlight&&highlight.includes(g))?'filter="url(#glow)"':'';
+  const sil=`<path d="M 77 2 C 93 2 98 14 97 27 C 96 40 90 48 82 50 C 87 54 89 60 89 67 C 109 71 128 81 138 95 C 147 109 147 125 138 133 L 126 124 C 130 109 128 94 133 83 C 114 73 95 67 85 67 L 85 133 C 101 136 115 153 117 175 C 119 197 115 219 115 241 C 115 255 117 269 115 277 L 96 277 C 98 263 99 249 98 234 C 97 219 95 207 93 197 L 77 197 C 72 207 70 219 68 234 C 67 249 68 263 70 277 L 51 277 C 49 269 51 255 51 241 C 51 219 47 197 49 175 C 51 153 65 136 80 133 L 80 67 C 70 67 51 73 32 83 C 37 94 35 109 39 124 L 27 133 C 18 125 18 109 27 95 C 37 81 56 71 76 67 C 76 60 78 54 83 50 C 69 48 63 40 63 27 C 62 14 67 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1"/>`;
+  if(view==='front')return sil+`
+    ${p('chest','M 44 92 Q 26 108 24 132 Q 24 150 36 160 Q 50 168 70 170 L 77 168 L 77 72 Q 60 74 50 84 Z',hl('chest'))}
+    ${p('chest','M 110 92 Q 128 108 130 132 Q 130 150 118 160 Q 104 168 84 170 L 77 168 L 77 72 Q 94 74 104 84 Z',hl('chest'))}
+    <line x1="77" y1="74" x2="77" y2="168" stroke="${sk}" stroke-width="0.9" opacity="0.45"/>
+    <path d="M 48 80 Q 62 74 77 74 Q 92 74 106 80" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.35"/>
+    ${p('shoulders','M 40 90 Q 22 106 18 128 Q 16 146 26 154 L 46 146 Q 42 130 42 114 Q 44 102 50 94 Z',hl('shoulders'))}
+    ${p('shoulders','M 114 90 Q 132 106 136 128 Q 138 146 128 154 L 108 146 Q 112 130 112 114 Q 110 102 104 94 Z',hl('shoulders'))}
+    ${p('biceps','M 18 152 Q 10 172 10 192 Q 10 208 18 218 L 40 214 Q 38 198 38 182 Q 38 164 40 152 Z',hl('biceps'))}
+    ${p('biceps','M 136 152 Q 144 172 144 192 Q 144 208 136 218 L 114 214 Q 116 198 116 182 Q 116 164 114 152 Z',hl('biceps'))}
+    <path d="M 22 168 Q 20 192 22 208" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    <path d="M 132 168 Q 134 192 132 208" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    ${p('forearm','M 18 216 Q 10 236 8 258 Q 6 274 14 284 L 36 286 Q 40 272 40 256 Q 40 236 38 216 Z',hl('forearm'))}
+    ${p('forearm','M 136 216 Q 144 236 146 258 Q 148 274 140 284 L 118 286 Q 114 272 114 256 Q 114 236 116 216 Z',hl('forearm'))}
+    ${p('core','M 28 166 Q 20 192 20 216 Q 20 234 28 244 L 65 246 L 65 168 Z','opacity="0.88" '+hl('core'))}
+    ${p('core','M 126 166 Q 134 192 134 216 Q 134 234 126 244 L 89 246 L 89 168 Z','opacity="0.88" '+hl('core'))}
+    <rect x="65" y="172" width="12" height="16" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="172" width="12" height="16" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="65" y="191" width="12" height="15" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="191" width="12" height="15" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="65" y="209" width="12" height="14" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="209" width="12" height="14" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <line x1="77" y1="172" x2="77" y2="244" stroke="${sk}" stroke-width="0.8" opacity="0.5"/>
+    ${p('quads','M 28 250 Q 16 286 14 316 Q 12 340 24 352 Q 42 366 68 368 L 77 366 L 77 252 Q 50 252 36 250 Z',hl('quads'))}
+    ${p('quads','M 126 250 Q 138 286 140 316 Q 142 340 130 352 Q 112 366 86 368 L 77 366 L 77 252 Q 104 252 118 250 Z',hl('quads'))}
+    <path d="M 44 258 Q 38 294 36 324" stroke="${sk}" stroke-width="0.55" fill="none" opacity="0.38"/>
+    <path d="M 110 258 Q 116 294 118 324" stroke="${sk}" stroke-width="0.55" fill="none" opacity="0.38"/>
+    <path d="M 64 256 Q 62 294 62 356" stroke="${sk}" stroke-width="0.4" fill="none" opacity="0.32"/>
+    <path d="M 90 256 Q 92 294 92 356" stroke="${sk}" stroke-width="0.4" fill="none" opacity="0.32"/>
+    ${p('calves','M 16 368 Q 8 390 8 410 Q 8 424 16 430 L 70 432 L 77 430 L 77 368 Z',hl('calves'))}
+    ${p('calves','M 138 368 Q 146 390 146 410 Q 146 424 138 430 L 84 432 L 77 430 L 77 368 Z',hl('calves'))}
+    <line x1="77" y1="372" x2="77" y2="430" stroke="${sk}" stroke-width="0.5" opacity="0.38"/>
+    `;
+  return sil+`
+    ${p('trapezius','M 77 50 Q 62 53 54 62 L 77 60 Z',hl('trapezius'))}
+    ${p('trapezius','M 77 50 Q 92 53 100 62 L 77 60 Z',hl('trapezius'))}
+    ${p('trapezius','M 32 88 Q 18 108 18 128 L 42 124 Q 46 108 56 98 Q 66 90 77 88 Z',hl('trapezius'))}
+    ${p('trapezius','M 122 88 Q 136 108 136 128 L 112 124 Q 108 108 98 98 Q 88 90 77 88 Z',hl('trapezius'))}
+    ${p('trapezius','M 42 124 Q 44 142 58 152 Q 68 160 77 162 Z','opacity="0.76" '+hl('trapezius'))}
+    ${p('trapezius','M 112 124 Q 110 142 96 152 Q 86 160 77 162 Z','opacity="0.76" '+hl('trapezius'))}
+    ${p('back','M 60 90 Q 50 114 50 136 Q 52 156 70 164 L 77 166 L 77 86 Z','opacity="0.62" '+hl('back'))}
+    ${p('back','M 94 90 Q 104 114 104 136 Q 102 156 84 164 L 77 166 L 77 86 Z','opacity="0.62" '+hl('back'))}
+    ${p('back','M 32 88 Q 14 120 12 154 Q 10 188 22 214 Q 34 234 58 246 L 74 254 L 74 112 Z',hl('back'))}
+    ${p('back','M 122 88 Q 140 120 142 154 Q 144 188 132 214 Q 120 234 96 246 L 80 254 L 80 112 Z',hl('back'))}
+    ${p('back','M 74 248 L 74 268 Q 76 280 77 288 Q 78 280 80 268 L 80 248 Z','opacity="0.68" '+hl('back'))}
+    ${p('shoulders','M 32 86 Q 16 100 14 124 L 40 120 Q 38 102 42 90 Z',hl('shoulders'))}
+    ${p('shoulders','M 122 86 Q 138 100 140 124 L 114 120 Q 116 102 112 90 Z',hl('shoulders'))}
+    ${p('triceps','M 14 122 Q 6 144 6 166 Q 6 184 14 194 L 40 190 Q 38 172 38 156 Q 38 138 42 122 Z',hl('triceps'))}
+    ${p('triceps','M 140 122 Q 148 144 148 166 Q 148 184 140 194 L 114 190 Q 116 172 116 156 Q 116 138 112 122 Z',hl('triceps'))}
+    <path d="M 16 140 Q 14 166 16 182" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    <path d="M 138 140 Q 140 166 138 182" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    ${p('forearm','M 14 192 Q 6 212 4 234 Q 2 250 10 260 L 32 262 Q 36 250 36 232 Q 36 212 38 192 Z',hl('forearm'))}
+    ${p('forearm','M 140 192 Q 148 212 150 234 Q 152 250 144 260 L 122 262 Q 118 250 118 232 Q 118 212 116 192 Z',hl('forearm'))}
+    ${p('glutes','M 24 260 Q 14 284 14 310 Q 14 336 28 348 Q 48 362 72 364 L 77 362 L 77 262 Z',hl('glutes'))}
+    ${p('glutes','M 130 260 Q 140 284 140 310 Q 140 336 126 348 Q 106 362 82 364 L 77 362 L 77 262 Z',hl('glutes'))}
+    <line x1="77" y1="264" x2="77" y2="362" stroke="${sk}" stroke-width="0.6" opacity="0.45"/>
+    <path d="M 18 336 Q 50 348 77 350 Q 104 348 136 336" stroke="${sk}" stroke-width="0.6" fill="none" opacity="0.38"/>
+    ${p('hamstrings','M 16 364 Q 8 388 6 412 Q 6 428 14 434 L 70 436 L 77 434 L 77 364 Z',hl('hamstrings'))}
+    ${p('hamstrings','M 138 364 Q 146 388 148 412 Q 148 428 140 434 L 84 436 L 77 434 L 77 364 Z',hl('hamstrings'))}
+    <path d="M 36 372 Q 34 408 34 426" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    <path d="M 118 372 Q 120 408 120 426" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
+    <path d="M 62 368 Q 62 408 64 432" stroke="${sk}" stroke-width="0.42" fill="none" opacity="0.32"/>
+    <path d="M 92 368 Q 92 408 90 432" stroke="${sk}" stroke-width="0.42" fill="none" opacity="0.32"/>
+    ${p('calves','M 10 432 Q 4 454 4 474 Q 4 488 12 494 L 70 496 L 77 494 L 77 432 Z',hl('calves'))}
+    ${p('calves','M 144 432 Q 150 454 150 474 Q 150 488 142 494 L 84 496 L 77 494 L 77 432 Z',hl('calves'))}
+    <line x1="77" y1="436" x2="77" y2="494" stroke="${sk}" stroke-width="0.5" opacity="0.38"/>
+  `;
 }
 function buildBodySVG(counts,max,highlight){
   const sk='#0A1018';
   const front=bodyPaths('front',counts,max,highlight);
   const back=bodyPaths('back',counts,max,highlight);
-  const legGrad=highlight?'':`<defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C3D50"/><stop offset="30%" stop-color="#C09888"/><stop offset="65%" stop-color="#D04030"/><stop offset="100%" stop-color="#E42418"/></linearGradient></defs>`;
-  const legend=highlight?'':`<rect x="50" y="358" width="210" height="7" rx="3.5" fill="url(#lg)"/><text x="50" y="378" font-size="10" fill="#5A6878" font-family="system-ui">0</text><text x="260" y="378" font-size="10" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
-  const h=highlight?330:382;
+  const glowF=`<filter id="glow" x="-50%" y="-30%" width="200%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C3D50"/><stop offset="30%" stop-color="#C09888"/><stop offset="65%" stop-color="#D04030"/><stop offset="100%" stop-color="#E42418"/></linearGradient>`;
+  const legend=highlight?'':`<rect x="50" y="452" width="210" height="7" rx="3.5" fill="url(#lg)"/><text x="50" y="470" font-size="10" fill="#5A6878" font-family="system-ui">0</text><text x="260" y="470" font-size="10" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
+  const h=highlight?450:480;
   return`<svg viewBox="0 0 310 ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
-    ${legGrad}
+    <defs>${glowF}${legGrad}</defs>
     <rect width="310" height="${h}" fill="${sk}" rx="12"/>
-    <text x="77" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">FRENTE</text>
-    <text x="231" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">COSTAS</text>
-    <ellipse cx="77" cy="32" rx="16" ry="20" fill="${sk}"/>
-    <path d="M 70 50 Q 67 58 68 66 L 86 66 Q 87 58 84 50 Z" fill="${sk}"/>
+    <text x="84" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">FRENTE</text>
+    <text x="238" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">COSTAS</text>
     <g transform="translate(7,16)">${front}</g>
-    <ellipse cx="231" cy="32" rx="16" ry="20" fill="${sk}"/>
-    <path d="M 224 50 Q 221 58 222 66 L 240 66 Q 241 58 238 50 Z" fill="${sk}"/>
     <g transform="translate(161,16) scale(1,0.88)">${back}</g>
     ${legend}
   </svg>`;
@@ -381,7 +420,24 @@ function renderProgresso(){
 function renderContent(){switch(S.tab){case'painel':return renderPainel();case'treino':return renderTreino();case'musculos':return renderMusculos();case'dieta':return renderDieta();case'progresso':return renderProgresso();}}
 function mount(){document.getElementById('bnav').innerHTML=renderNav();document.getElementById('content').innerHTML=renderContent();}
 function remountContent(){document.getElementById('content').innerHTML=renderContent();}
-function openDetail(exId,dayId){const exs=WORKOUTS[dayId]||[];const ex=exs.find(e=>e.id===exId);if(!ex)return;S.detailEx=exId;S.detailDay=dayId;document.getElementById('ed-exname').textContent=ex.n;document.getElementById('ed-body-svg').innerHTML=buildBodySVG({},1,EX_MUS[exId]||[]);renderDetailSets();document.getElementById('ex-detail').classList.add('open');detailTimer={rem:null,iid:null};document.getElementById('ed-timer-num').textContent='90s';document.getElementById('ed-timer-btn').textContent='Iniciar';}
+function openDetail(exId,dayId){
+  const exs=WORKOUTS[dayId]||[];const ex=exs.find(e=>e.id===exId);if(!ex)return;
+  S.detailEx=exId;S.detailDay=dayId;
+  document.getElementById('ed-exname').textContent=ex.n;
+  const muss=EX_MUS[exId]||[];
+  const gifId=EX_GIF[exId];
+  const mediaEl=document.getElementById('ed-media');
+  if(gifId){
+    const badges=muss.map(g=>`<span style="background:var(--sf2);color:#35CC60;font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase">${MLBL[g]}</span>`).join('');
+    mediaEl.innerHTML=`<div style="background:#0A1118;border-radius:12px;overflow:hidden;margin:14px 0"><img id="ed-gif" src="${_GB}${gifId}/0.gif" alt="${ex.n}" style="width:100%;max-height:220px;object-fit:contain;display:block"><div style="padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px">${badges}</div></div>`;
+    const img=document.getElementById('ed-gif');
+    if(img)img.onerror=()=>{mediaEl.innerHTML=`<div class="ed-musc-wrap">${buildBodySVG({},1,muss)}</div>`;};
+  }else{
+    mediaEl.innerHTML=`<div class="ed-musc-wrap">${buildBodySVG({},1,muss)}</div>`;
+  }
+  renderDetailSets();document.getElementById('ex-detail').classList.add('open');
+  detailTimer={rem:null,iid:null};document.getElementById('ed-timer-num').textContent='90s';document.getElementById('ed-timer-btn').textContent='Iniciar';
+}
 function renderDetailSets(){const skey=`workout:${todayISO()}:${S.detailDay}`;const log=DB.get(skey)||{};const sets=log[S.detailEx]?.sets||[];const done=sets.filter(s=>s.done).length;document.getElementById('ed-sets-done').textContent=`${done}/${sets.length} séries`;document.getElementById('ed-sets-list').innerHTML=sets.map((s,i)=>`<div class="set-row"><span class="set-n">Série ${i+1}</span><input class="set-in" type="number" inputmode="decimal" placeholder="kg" value="${s.kg||''}" data-set-kg="${i}"><input class="set-in" type="number" inputmode="numeric" placeholder="reps" value="${s.reps||''}" data-set-reps="${i}"><button class="set-done-btn${s.done?' on':''}" data-set-done="${i}">${s.done?chkSvg(13):''}</button></div>`).join('');}
 function detailSaveSet(idx,field,val){const skey=`workout:${todayISO()}:${S.detailDay}`;const log=DB.get(skey)||{};const sets=[...(log[S.detailEx]?.sets||[])];if(!sets[idx])sets[idx]={};sets[idx][field]=val;DB.set(skey,{...log,[S.detailEx]:{...log[S.detailEx],sets}});}
 function closeDetail(){document.getElementById('ex-detail').classList.remove('open');if(detailTimer.iid){clearInterval(detailTimer.iid);detailTimer={rem:null,iid:null};}S.detailEx=null;S.detailDay=null;}
