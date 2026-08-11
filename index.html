@@ -273,75 +273,65 @@ function muscColor(g,counts,max,highlight){
 function bodyPaths(view,counts,max,highlight){
   const mc=g=>muscColor(g,counts,max,highlight);
   const sk='#060E18';const base='#18293A';
-  const sw='stroke-width="0.65"';
+  const sw='stroke-width="0.6"';
   const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x}/>`;
   const hl=g=>(highlight&&highlight.includes(g))?'filter="url(#glow)"':'';
-  const sil=`<path d="M 77 2 C 93 2 98 14 97 27 C 96 40 90 48 82 50 C 87 54 89 60 89 67 C 109 71 128 81 138 95 C 147 109 147 125 138 133 L 126 124 C 130 109 128 94 133 83 C 114 73 95 67 85 67 L 85 133 C 101 136 115 153 117 175 C 119 197 115 219 115 241 C 115 255 117 269 115 277 L 96 277 C 98 263 99 249 98 234 C 97 219 95 207 93 197 L 77 197 C 72 207 70 219 68 234 C 67 249 68 263 70 277 L 51 277 C 49 269 51 255 51 241 C 51 219 47 197 49 175 C 51 153 65 136 80 133 L 80 67 C 70 67 51 73 32 83 C 37 94 35 109 39 124 L 27 133 C 18 125 18 109 27 95 C 37 81 56 71 76 67 C 76 60 78 54 83 50 C 69 48 63 40 63 27 C 62 14 67 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1"/>`;
+  // Silhueta: cabeça + torso (sem braços, sem pernas — esses são os próprios grupos musculares)
+  // Centro x=77; ombros chegam a x=26/x=128; cintura estreita x=44/x=110; quadril x=42/x=112
+  const sil=`<path d="M 77 2 C 91 2 97 12 95 26 C 93 38 87 47 81 49 C 84 53 86 59 86 67 C 100 70 118 79 126 93 C 133 107 132 123 126 135 C 122 139 118 141 116 141 C 117 157 115 173 112 191 C 110 207 109 225 110 247 C 110 259 112 269 110 277 L 95 277 C 94 267 93 255 92 245 L 77 245 C 62 245 61 255 60 267 L 59 277 L 44 277 C 42 269 44 259 44 247 C 45 225 44 207 42 191 C 39 173 37 157 38 141 C 36 141 32 139 28 135 C 22 123 21 107 28 93 C 36 79 54 70 68 67 C 68 59 70 53 73 49 C 67 47 61 38 59 26 C 57 12 63 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1"/>`;
   if(view==='front')return sil+`
-    ${p('chest','M 44 92 Q 26 108 24 132 Q 24 150 36 160 Q 50 168 70 170 L 77 168 L 77 72 Q 60 74 50 84 Z',hl('chest'))}
-    ${p('chest','M 110 92 Q 128 108 130 132 Q 130 150 118 160 Q 104 168 84 170 L 77 168 L 77 72 Q 94 74 104 84 Z',hl('chest'))}
-    <line x1="77" y1="74" x2="77" y2="168" stroke="${sk}" stroke-width="0.9" opacity="0.45"/>
-    <path d="M 48 80 Q 62 74 77 74 Q 92 74 106 80" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.35"/>
-    ${p('shoulders','M 40 90 Q 22 106 18 128 Q 16 146 26 154 L 46 146 Q 42 130 42 114 Q 44 102 50 94 Z',hl('shoulders'))}
-    ${p('shoulders','M 114 90 Q 132 106 136 128 Q 138 146 128 154 L 108 146 Q 112 130 112 114 Q 110 102 104 94 Z',hl('shoulders'))}
-    ${p('biceps','M 18 152 Q 10 172 10 192 Q 10 208 18 218 L 40 214 Q 38 198 38 182 Q 38 164 40 152 Z',hl('biceps'))}
-    ${p('biceps','M 136 152 Q 144 172 144 192 Q 144 208 136 218 L 114 214 Q 116 198 116 182 Q 116 164 114 152 Z',hl('biceps'))}
-    <path d="M 22 168 Q 20 192 22 208" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    <path d="M 132 168 Q 134 192 132 208" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    ${p('forearm','M 18 216 Q 10 236 8 258 Q 6 274 14 284 L 36 286 Q 40 272 40 256 Q 40 236 38 216 Z',hl('forearm'))}
-    ${p('forearm','M 136 216 Q 144 236 146 258 Q 148 274 140 284 L 118 286 Q 114 272 114 256 Q 114 236 116 216 Z',hl('forearm'))}
-    ${p('core','M 28 166 Q 20 192 20 216 Q 20 234 28 244 L 65 246 L 65 168 Z','opacity="0.88" '+hl('core'))}
-    ${p('core','M 126 166 Q 134 192 134 216 Q 134 234 126 244 L 89 246 L 89 168 Z','opacity="0.88" '+hl('core'))}
-    <rect x="65" y="172" width="12" height="16" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="172" width="12" height="16" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="65" y="191" width="12" height="15" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="191" width="12" height="15" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="65" y="209" width="12" height="14" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="209" width="12" height="14" rx="3.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <line x1="77" y1="172" x2="77" y2="244" stroke="${sk}" stroke-width="0.8" opacity="0.5"/>
-    ${p('quads','M 28 250 Q 16 286 14 316 Q 12 340 24 352 Q 42 366 68 368 L 77 366 L 77 252 Q 50 252 36 250 Z',hl('quads'))}
-    ${p('quads','M 126 250 Q 138 286 140 316 Q 142 340 130 352 Q 112 366 86 368 L 77 366 L 77 252 Q 104 252 118 250 Z',hl('quads'))}
-    <path d="M 44 258 Q 38 294 36 324" stroke="${sk}" stroke-width="0.55" fill="none" opacity="0.38"/>
-    <path d="M 110 258 Q 116 294 118 324" stroke="${sk}" stroke-width="0.55" fill="none" opacity="0.38"/>
-    <path d="M 64 256 Q 62 294 62 356" stroke="${sk}" stroke-width="0.4" fill="none" opacity="0.32"/>
-    <path d="M 90 256 Q 92 294 92 356" stroke="${sk}" stroke-width="0.4" fill="none" opacity="0.32"/>
-    ${p('calves','M 16 368 Q 8 390 8 410 Q 8 424 16 430 L 70 432 L 77 430 L 77 368 Z',hl('calves'))}
-    ${p('calves','M 138 368 Q 146 390 146 410 Q 146 424 138 430 L 84 432 L 77 430 L 77 368 Z',hl('calves'))}
-    <line x1="77" y1="372" x2="77" y2="430" stroke="${sk}" stroke-width="0.5" opacity="0.38"/>
+    ${p('chest','M 77 86 L 77 192 C 66 188 55 176 49 162 C 43 148 44 132 52 118 C 58 106 68 96 77 86 Z',hl('chest'))}
+    ${p('chest','M 77 86 L 77 192 C 88 188 99 176 105 162 C 111 148 110 132 102 118 C 96 106 86 96 77 86 Z',hl('chest'))}
+    <line x1="77" y1="86" x2="77" y2="192" stroke="${sk}" stroke-width="1" opacity="0.5"/>
+    <path d="M 52 82 Q 64 76 77 76 Q 90 76 102 82" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.3"/>
+    ${p('shoulders','M 42 133 C 28 120 26 104 30 90 C 38 78 56 72 72 70 L 76 90 C 60 94 48 106 44 120 Z',hl('shoulders'))}
+    ${p('shoulders','M 112 133 C 126 120 128 104 124 90 C 116 78 98 72 82 70 L 78 90 C 94 94 106 106 110 120 Z',hl('shoulders'))}
+    ${p('biceps','M 24 131 C 14 143 10 163 10 183 C 10 199 15 213 24 219 L 38 215 C 36 201 36 183 37 165 C 37 149 31 137 29 133 Z',hl('biceps'))}
+    ${p('biceps','M 130 131 C 140 143 144 163 144 183 C 144 199 139 213 130 219 L 116 215 C 118 201 117 183 117 165 C 117 149 123 137 125 133 Z',hl('biceps'))}
+    ${p('forearm','M 24 217 C 13 237 10 257 13 275 C 16 287 24 296 36 300 L 40 294 C 39 280 38 260 38 242 C 38 228 38 218 38 213 Z',hl('forearm'))}
+    ${p('forearm','M 130 217 C 141 237 144 257 141 275 C 138 287 130 296 118 300 L 114 294 C 115 280 116 260 116 242 C 116 228 116 218 116 213 Z',hl('forearm'))}
+    ${p('core','M 38 194 C 32 212 30 230 31 248 C 32 258 36 266 40 272 L 72 274 L 72 196 Z','opacity="0.82" '+hl('core'))}
+    ${p('core','M 116 194 C 122 212 124 230 123 248 C 122 258 118 266 114 272 L 82 274 L 82 196 Z','opacity="0.82" '+hl('core'))}
+    <rect x="66" y="200" width="11" height="14" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="200" width="11" height="14" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="66" y="217" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="217" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="66" y="233" width="11" height="12" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="77" y="233" width="11" height="12" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <line x1="77" y1="200" x2="77" y2="274" stroke="${sk}" stroke-width="0.8" opacity="0.45"/>
+    ${p('quads','M 44 277 C 37 297 34 319 35 341 C 36 359 41 371 50 378 L 75 380 L 77 279 Z',hl('quads'))}
+    ${p('quads','M 110 277 C 117 297 120 319 119 341 C 118 359 113 371 104 378 L 79 380 L 77 279 Z',hl('quads'))}
+    <path d="M 57 285 C 54 317 53 345 55 371" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.35"/>
+    <path d="M 97 285 C 100 317 101 345 99 371" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.35"/>
+    ${p('calves','M 43 380 C 35 396 32 416 35 430 C 38 440 46 446 56 448 L 75 448 L 75 380 Z',hl('calves'))}
+    ${p('calves','M 111 380 C 119 396 122 416 119 430 C 116 440 108 446 98 448 L 79 448 L 79 380 Z',hl('calves'))}
     `;
+  // Vista de costas — mesma silhueta, grupos musculares posteriores
   return sil+`
-    ${p('trapezius','M 77 50 Q 62 53 54 62 L 77 60 Z',hl('trapezius'))}
-    ${p('trapezius','M 77 50 Q 92 53 100 62 L 77 60 Z',hl('trapezius'))}
-    ${p('trapezius','M 32 88 Q 18 108 18 128 L 42 124 Q 46 108 56 98 Q 66 90 77 88 Z',hl('trapezius'))}
-    ${p('trapezius','M 122 88 Q 136 108 136 128 L 112 124 Q 108 108 98 98 Q 88 90 77 88 Z',hl('trapezius'))}
-    ${p('trapezius','M 42 124 Q 44 142 58 152 Q 68 160 77 162 Z','opacity="0.76" '+hl('trapezius'))}
-    ${p('trapezius','M 112 124 Q 110 142 96 152 Q 86 160 77 162 Z','opacity="0.76" '+hl('trapezius'))}
-    ${p('back','M 60 90 Q 50 114 50 136 Q 52 156 70 164 L 77 166 L 77 86 Z','opacity="0.62" '+hl('back'))}
-    ${p('back','M 94 90 Q 104 114 104 136 Q 102 156 84 164 L 77 166 L 77 86 Z','opacity="0.62" '+hl('back'))}
-    ${p('back','M 32 88 Q 14 120 12 154 Q 10 188 22 214 Q 34 234 58 246 L 74 254 L 74 112 Z',hl('back'))}
-    ${p('back','M 122 88 Q 140 120 142 154 Q 144 188 132 214 Q 120 234 96 246 L 80 254 L 80 112 Z',hl('back'))}
-    ${p('back','M 74 248 L 74 268 Q 76 280 77 288 Q 78 280 80 268 L 80 248 Z','opacity="0.68" '+hl('back'))}
-    ${p('shoulders','M 32 86 Q 16 100 14 124 L 40 120 Q 38 102 42 90 Z',hl('shoulders'))}
-    ${p('shoulders','M 122 86 Q 138 100 140 124 L 114 120 Q 116 102 112 90 Z',hl('shoulders'))}
-    ${p('triceps','M 14 122 Q 6 144 6 166 Q 6 184 14 194 L 40 190 Q 38 172 38 156 Q 38 138 42 122 Z',hl('triceps'))}
-    ${p('triceps','M 140 122 Q 148 144 148 166 Q 148 184 140 194 L 114 190 Q 116 172 116 156 Q 116 138 112 122 Z',hl('triceps'))}
-    <path d="M 16 140 Q 14 166 16 182" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    <path d="M 138 140 Q 140 166 138 182" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    ${p('forearm','M 14 192 Q 6 212 4 234 Q 2 250 10 260 L 32 262 Q 36 250 36 232 Q 36 212 38 192 Z',hl('forearm'))}
-    ${p('forearm','M 140 192 Q 148 212 150 234 Q 152 250 144 260 L 122 262 Q 118 250 118 232 Q 118 212 116 192 Z',hl('forearm'))}
-    ${p('glutes','M 24 260 Q 14 284 14 310 Q 14 336 28 348 Q 48 362 72 364 L 77 362 L 77 262 Z',hl('glutes'))}
-    ${p('glutes','M 130 260 Q 140 284 140 310 Q 140 336 126 348 Q 106 362 82 364 L 77 362 L 77 262 Z',hl('glutes'))}
-    <line x1="77" y1="264" x2="77" y2="362" stroke="${sk}" stroke-width="0.6" opacity="0.45"/>
-    <path d="M 18 336 Q 50 348 77 350 Q 104 348 136 336" stroke="${sk}" stroke-width="0.6" fill="none" opacity="0.38"/>
-    ${p('hamstrings','M 16 364 Q 8 388 6 412 Q 6 428 14 434 L 70 436 L 77 434 L 77 364 Z',hl('hamstrings'))}
-    ${p('hamstrings','M 138 364 Q 146 388 148 412 Q 148 428 140 434 L 84 436 L 77 434 L 77 364 Z',hl('hamstrings'))}
-    <path d="M 36 372 Q 34 408 34 426" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    <path d="M 118 372 Q 120 408 120 426" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.38"/>
-    <path d="M 62 368 Q 62 408 64 432" stroke="${sk}" stroke-width="0.42" fill="none" opacity="0.32"/>
-    <path d="M 92 368 Q 92 408 90 432" stroke="${sk}" stroke-width="0.42" fill="none" opacity="0.32"/>
-    ${p('calves','M 10 432 Q 4 454 4 474 Q 4 488 12 494 L 70 496 L 77 494 L 77 432 Z',hl('calves'))}
-    ${p('calves','M 144 432 Q 150 454 150 474 Q 150 488 142 494 L 84 496 L 77 494 L 77 432 Z',hl('calves'))}
-    <line x1="77" y1="436" x2="77" y2="494" stroke="${sk}" stroke-width="0.5" opacity="0.38"/>
+    ${p('trapezius','M 77 49 C 66 52 58 60 56 68 L 77 64 Z',hl('trapezius'))}
+    ${p('trapezius','M 77 49 C 88 52 96 60 98 68 L 77 64 Z',hl('trapezius'))}
+    ${p('trapezius','M 28 93 C 20 110 20 128 26 139 L 44 130 C 40 112 44 96 56 88 C 64 82 77 80 77 80 Z',hl('trapezius'))}
+    ${p('trapezius','M 126 93 C 134 110 134 128 128 139 L 110 130 C 114 112 110 96 98 88 C 90 82 77 80 77 80 Z',hl('trapezius'))}
+    ${p('trapezius','M 44 130 C 46 148 60 158 69 164 L 77 166 Z','opacity="0.72" '+hl('trapezius'))}
+    ${p('trapezius','M 110 130 C 108 148 94 158 85 164 L 77 166 Z','opacity="0.72" '+hl('trapezius'))}
+    ${p('back','M 62 88 C 52 114 52 138 54 156 C 58 172 68 180 77 182 L 77 82 Z','opacity="0.58" '+hl('back'))}
+    ${p('back','M 92 88 C 102 114 102 138 100 156 C 96 172 86 180 77 182 L 77 82 Z','opacity="0.58" '+hl('back'))}
+    ${p('back','M 38 139 C 24 166 22 198 24 224 C 28 244 40 260 60 270 L 76 276 L 76 126 Z',hl('back'))}
+    ${p('back','M 116 139 C 130 166 132 198 130 224 C 126 244 114 260 94 270 L 78 276 L 78 126 Z',hl('back'))}
+    ${p('back','M 76 270 L 76 284 C 77 292 77 296 77 296 C 77 296 77 292 78 284 L 78 270 Z','opacity="0.65" '+hl('back'))}
+    ${p('shoulders','M 28 91 C 18 108 18 126 24 139 L 44 130 C 40 112 40 96 46 88 Z',hl('shoulders'))}
+    ${p('shoulders','M 126 91 C 136 108 136 126 130 139 L 110 130 C 114 112 114 96 108 88 Z',hl('shoulders'))}
+    ${p('triceps','M 18 127 C 10 149 8 169 8 189 C 8 207 14 219 22 225 L 38 221 C 36 205 36 187 36 169 C 36 151 38 137 42 127 Z',hl('triceps'))}
+    ${p('triceps','M 136 127 C 144 149 146 169 146 189 C 146 207 140 219 132 225 L 116 221 C 118 205 118 187 118 169 C 118 151 116 137 112 127 Z',hl('triceps'))}
+    ${p('forearm','M 22 223 C 12 243 10 263 13 281 C 16 293 24 302 36 306 L 40 300 C 38 286 37 268 37 250 C 37 234 38 222 38 219 Z',hl('forearm'))}
+    ${p('forearm','M 132 223 C 142 243 144 263 141 281 C 138 293 130 302 118 306 L 114 300 C 116 286 117 268 117 250 C 117 234 116 222 116 219 Z',hl('forearm'))}
+    ${p('glutes','M 44 277 C 36 299 34 323 36 345 C 38 363 46 375 58 380 L 77 382 L 77 279 Z',hl('glutes'))}
+    ${p('glutes','M 110 277 C 118 299 120 323 118 345 C 116 363 108 375 96 380 L 77 382 L 77 279 Z',hl('glutes'))}
+    <path d="M 26 354 C 44 366 77 370 77 370 C 77 370 110 366 128 354" stroke="${sk}" stroke-width="0.6" fill="none" opacity="0.35"/>
+    ${p('hamstrings','M 36 380 C 28 402 26 424 28 440 C 30 452 38 460 50 462 L 75 464 L 77 382 Z',hl('hamstrings'))}
+    ${p('hamstrings','M 118 380 C 126 402 128 424 126 440 C 124 452 116 460 104 462 L 79 464 L 77 382 Z',hl('hamstrings'))}
+    ${p('calves','M 28 462 C 22 480 22 498 26 510 C 30 520 40 526 52 528 L 75 528 L 75 462 Z',hl('calves'))}
+    ${p('calves','M 126 462 C 132 480 132 498 128 510 C 124 520 114 526 102 528 L 79 528 L 79 462 Z',hl('calves'))}
   `;
 }
 function buildBodySVG(counts,max,highlight){
