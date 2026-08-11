@@ -25,7 +25,7 @@ svg{display:block;flex-shrink:0}
   --mo:ui-monospace,'Cascadia Code','Fira Code',monospace;
 }
 html,body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:100svh;-webkit-tap-highlight-color:transparent}
-#app{max-width:430px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column}
+#app{max-width:430px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column;position:relative}
 #bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--sf);border-top:1px solid var(--bd);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px}
 .bn-ic{color:var(--tx2);transition:color .14s}
@@ -163,6 +163,33 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:
 .sec-title{font-size:.88rem;font-weight:800}
 .btn-sm{padding:5px 12px;border-radius:7px;background:var(--sf);border:1px solid var(--bd);font-size:.72rem;font-weight:700;color:var(--tx2)}
 .exp-btn{width:100%;padding:12px;border-radius:10px;background:var(--sf);border:1px solid var(--bd);font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;color:var(--tx)}
+/* ── Tema claro ── */
+:root.light{--bg:#F5F2EC;--sf:#FFFFFF;--sf2:#EDE9E0;--bd:#D5D0C8;--tx:#1A1A1A;--tx2:#6B6560;--ru:#C45A1A;--rd:#9E440E;--ol:#4E7A3C;--od:#3D6030}
+/* ── Animações ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.tab-anim{animation:fadeUp .18s ease both}
+/* ── Onboarding ── */
+#onboarding{position:fixed;inset:0;background:var(--bg);z-index:600;display:flex;align-items:center;justify-content:center;max-width:430px;left:50%;transform:translateX(-50%);transition:opacity .3s}
+#onboarding.hidden{display:none}
+.onb-body{display:flex;flex-direction:column;align-items:center;padding:28px 24px 36px;text-align:center;gap:0;width:100%;max-width:360px}
+.onb-icon{width:80px;height:80px;border-radius:20px;margin-bottom:20px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+.onb-title{font-size:1.9rem;font-weight:900;letter-spacing:-.02em;margin-bottom:6px}
+.onb-sub{font-size:.88rem;color:var(--tx2);margin-bottom:24px;line-height:1.5}
+.onb-steps{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;margin-bottom:28px}
+.onb-step{display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:11px 14px}
+.onb-step-ic{font-size:1.25rem;flex-shrink:0;width:28px;text-align:center}
+.onb-step-tx{font-size:.83rem;line-height:1.35}
+.onb-btn{width:100%;padding:15px;border-radius:12px;background:var(--ru);color:#fff;font-size:1rem;font-weight:800;letter-spacing:.02em}
+/* ── Botão tema ── */
+#theme-btn{position:fixed;top:14px;right:12px;z-index:300;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;font-size:.72rem;font-weight:700;color:var(--tx2);display:flex;align-items:center;gap:5px}
+@media(min-width:454px){#theme-btn{right:calc(50vw - 203px)}}
+/* ── Fotos ── */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--sf2)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.65);border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;line-height:1}
+.photo-date{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:3px 5px;font-size:.52rem;color:#fff;text-align:center}
+.photo-add-btn{aspect-ratio:1;border-radius:8px;border:1.5px dashed var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--tx2);font-size:.65rem;font-weight:700;cursor:pointer;background:transparent}
 </style>
 </head>
 <body>
@@ -196,6 +223,28 @@ html,body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:
     </div>
   </div>
 </div>
+
+<!-- Onboarding -->
+<div id="onboarding" class="hidden">
+  <div class="onb-body">
+    <img class="onb-icon" src="./icon-192.png" alt="Bulk Log">
+    <div class="onb-title">Bulk Log</div>
+    <div class="onb-sub">Registre treinos, dieta e progresso.<br>Simples, rápido, offline.</div>
+    <div class="onb-steps">
+      <div class="onb-step"><span class="onb-step-ic">🏋️</span><span class="onb-step-tx"><b>Treino diário</b> com timer e registro de séries</span></div>
+      <div class="onb-step"><span class="onb-step-ic">🏆</span><span class="onb-step-tx"><b>Recordes pessoais</b> detectados automaticamente</span></div>
+      <div class="onb-step"><span class="onb-step-ic">📊</span><span class="onb-step-tx"><b>Progresso</b> de peso, medidas e fotos</span></div>
+    </div>
+    <button class="onb-btn" id="onb-start">Começar →</button>
+  </div>
+</div>
+
+<!-- Tema -->
+<button id="theme-btn" title="Alternar tema"></button>
+
+<!-- Input fotos (oculto) -->
+<input type="file" id="photo-input" accept="image/*" style="display:none">
+
 <script>
 'use strict';
 const DAYS=[
@@ -523,7 +572,8 @@ function renderTreino(){
     const muss=(EX_MUS[ex.id]||[]).map(g=>MLBL[g]).join(', ');const pr=getPR(ex.id);const prBadge=pr?`<span class="pr-badge">🏆 PR ${pr.kg}kg</span>`:'';
     return`<div class="ex${done?' done':''}" id="ex-${ex.id}"><div class="ex-top"><button class="chk${done?' on':''}" data-toggle="${ex.id}" data-skey="${skey}">${done?chkSvg():''}</button><div class="ex-info" data-open-detail="${ex.id}" data-detail-day="${dayId}" style="cursor:pointer"><div class="ex-nm" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${ex.n}${prBadge}</div><div class="ex-tg">${ex.t} · <span style="color:var(--ru)">${muss}</span></div></div><span class="ex-arr">${ico('arrowR',16,'#7A8898')}</span></div><div class="ex-bot"><button class="hist-btn" data-hist="${ex.id}">${ico('history',13,'#7A8898')}<span>Histórico</span></button><button class="timer-b${running?' run':''}" id="timer-${ex.id}" data-timer="${ex.id}">${ico('clock',13,running?'#fff':'#7A8898')}<span id="tl-${ex.id}">${running?TIMERS[ex.id].rem+'s':'90s'}</span></button></div>${histHtml}</div>`;
   }).join('');
-  return`<div class="dscroll">${pills}</div><div style="margin-bottom:14px"><div class="h2">${day.full}</div><div class="sub">${day.focus}</div></div><div class="pstrip"><div class="pbar"><div class="pfill" id="pfill" style="width:${(doneCount/exs.length)*100}%"></div></div><span class="pct" id="pct-lbl">${doneCount}/${exs.length}</span></div>${cards}`;
+  const emptyState=doneCount===0&&Object.keys(log).length===0?`<div style="background:linear-gradient(135deg,var(--sf),var(--sf2));border:1px solid var(--bd);border-radius:12px;padding:18px 16px;margin-bottom:12px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">💪</div><div style="font-weight:800;font-size:.92rem;margin-bottom:3px">Hora de treinar!</div><div style="font-size:.75rem;color:var(--tx2)">Toque em um exercício para registrar as séries.</div></div>`:'';
+  return`<div class="dscroll">${pills}</div><div style="margin-bottom:14px"><div class="h2">${day.full}</div><div class="sub">${day.focus}</div></div><div class="pstrip"><div class="pbar"><div class="pfill" id="pfill" style="width:${(doneCount/exs.length)*100}%"></div></div><span class="pct" id="pct-lbl">${doneCount}/${exs.length}</span></div>${emptyState}${cards}`;
 }
 function renderMusculos(){
   const ws=S.muscWeek;const counts={};
@@ -557,10 +607,10 @@ function renderProgresso(){
   const medidasSection=`<div class="sec-head"><span class="sec-title">Medidas Corporais</span>${lastMed?`<span style="font-size:.68rem;color:var(--tx2)">${lastMed.date}</span>`:''}</div><div class="med-grid">${medInputs}</div><button data-save-medidas style="width:100%;padding:10px;border-radius:8px;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-weight:700;font-size:.82rem;margin-bottom:${medLog?'0':'14px'}">Salvar medidas</button>${medLog?`<div style="margin:6px 0 14px">${medLog}</div>`:''}`;
   const unlocked=calcAchievements();
   const achvsSection=`<div class="sec-head"><span class="sec-title">Conquistas</span><span style="font-size:.72rem;color:var(--tx2)">${unlocked.size}/${ACHVS.length}</span></div><div class="achv-grid">${ACHVS.map(a=>{const on=unlocked.has(a.id);return`<div class="achv-item${on?' unlocked':' locked'}"><div class="achv-icon">${a.icon}</div><div class="achv-nm">${a.name}</div><div class="achv-desc">${a.desc}</div></div>`;}).join('')}</div>`;
-  return`<div style="padding:20px 0 14px"><div class="h2">Progresso</div><div class="sub">Peso corporal — ganho de massa</div></div><div class="w-row"><input class="w-in" id="w-input" type="number" inputmode="decimal" placeholder="Peso hoje (kg)" value="${S.wInput}"><button class="w-add" data-add-weight>${ico('plus',20,'#E8E4DC')}</button></div>${chartHtml}${logRows}${medidasSection}${achvsSection}<button data-export-csv class="exp-btn">${ico('download',16,'#7A8898')} Exportar treinos (CSV)</button>`;
+  return`<div style="padding:20px 0 14px"><div class="h2">Progresso</div><div class="sub">Peso corporal — ganho de massa</div></div><div class="w-row"><input class="w-in" id="w-input" type="number" inputmode="decimal" placeholder="Peso hoje (kg)" value="${S.wInput}"><button class="w-add" data-add-weight>${ico('plus',20,'#E8E4DC')}</button></div>${chartHtml}${logRows}${medidasSection}${renderPhotos()}${achvsSection}<button data-export-csv class="exp-btn">${ico('download',16,'#7A8898')} Exportar treinos (CSV)</button>`;
 }
 function renderContent(){switch(S.tab){case'painel':return renderPainel();case'treino':return renderTreino();case'musculos':return renderMusculos();case'dieta':return renderDieta();case'progresso':return renderProgresso();}}
-function mount(){document.getElementById('bnav').innerHTML=renderNav();document.getElementById('content').innerHTML=renderContent();}
+function mount(){document.getElementById('bnav').innerHTML=renderNav();const c=document.getElementById('content');c.innerHTML=renderContent();c.classList.remove('tab-anim');requestAnimationFrame(()=>c.classList.add('tab-anim'));}
 function remountContent(){document.getElementById('content').innerHTML=renderContent();}
 function openDetail(exId,dayId){
   const exs=WORKOUTS[dayId]||[];const ex=exs.find(e=>e.id===exId);if(!ex)return;
@@ -607,6 +657,8 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-export-csv]')){exportCSV();return;}
   if(t.closest('[data-edit-goals]')){S.editingGoals=!S.editingGoals;remountContent();return;}
   if(t.closest('[data-save-goals]')){const w=parseInt(document.getElementById('gl-w')?.value)||4;const s=parseInt(document.getElementById('gl-s')?.value)||40;DB.set('goals',{workouts:Math.max(1,w),sets:Math.max(1,s)});S.editingGoals=false;remountContent();return;}
+  if(t.closest('[data-add-photo]')){document.getElementById('photo-input').click();return;}
+  const dp2=t.closest('[data-del-photo]');if(dp2){const idx=parseInt(dp2.dataset.delPhoto);const photos=DB.get('progress-photos')||[];photos.splice(idx,1);DB.set('progress-photos',photos);remountContent();return;}
 });
 document.addEventListener('input',e=>{if(e.target.id==='w-input')S.wInput=e.target.value;});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-input')document.querySelector('[data-add-weight]')?.click();if(e.key==='Escape')closeDetail();});
@@ -618,7 +670,25 @@ document.getElementById('ex-detail').addEventListener('click',e=>{
   const sd=t.closest('[data-set-done]');if(sd){const idx=parseInt(sd.dataset.setDone);const skey=`workout:${todayISO()}:${S.detailDay}`;const log=DB.get(skey)||{};const sets=[...(log[S.detailEx]?.sets||[])];if(sets[idx])sets[idx].done=!sets[idx].done;DB.set(skey,{...log,[S.detailEx]:{...log[S.detailEx],sets}});if(sets[idx]?.done){const bestKg=Math.max(0,...sets.filter(s=>s.done&&s.kg).map(s=>parseFloat(s.kg)||0));const bestReps=Math.max(0,...sets.filter(s=>s.done&&s.reps).map(s=>parseInt(s.reps)||0));if(bestKg>0)checkAndSavePR(S.detailEx,bestKg,bestReps);}renderDetailSets();return;}
 });
 document.getElementById('ex-detail').addEventListener('input',e=>{const t=e.target;if(t.dataset.setKg!==undefined)detailSaveSet(parseInt(t.dataset.setKg),'kg',t.value);if(t.dataset.setReps!==undefined)detailSaveSet(parseInt(t.dataset.setReps),'reps',t.value);});
+// ── Tema claro/escuro ──────────────────────────────────────────────
+P.moon='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z';
+function applyTheme(t){document.documentElement.classList.toggle('light',t==='light');const btn=document.getElementById('theme-btn');if(btn)btn.innerHTML=t==='light'?ico('sun',16,'#C45A1A')+' Escuro':ico('moon',16,'#7A8898')+' Claro';}
+function initTheme(){applyTheme(localStorage.getItem('theme')||'dark');}
+initTheme();
+
+// ── Onboarding ─────────────────────────────────────────────────────
+function initOnboarding(){if(!localStorage.getItem('onboarding_done')){document.getElementById('onboarding').classList.remove('hidden');}else{document.getElementById('onboarding').classList.add('hidden');}}
+document.getElementById('onb-start').addEventListener('click',()=>{localStorage.setItem('onboarding_done','1');const el=document.getElementById('onboarding');el.style.opacity='0';setTimeout(()=>el.classList.add('hidden'),300);});
+document.getElementById('theme-btn').addEventListener('click',()=>{const isLight=document.documentElement.classList.contains('light');const next=isLight?'dark':'light';localStorage.setItem('theme',next);applyTheme(next);});
+
+// ── Fotos de progresso ─────────────────────────────────────────────
+function compressPhoto(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const max=640;const cv=document.createElement('canvas');let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>max){w=Math.round(w*max/h);h=max;}cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL('image/jpeg',.5));};img.src=e.target.result;};r.readAsDataURL(file);}
+function renderPhotos(){const photos=DB.get('progress-photos')||[];const thumbs=photos.map((p,i)=>`<div class="photo-thumb"><img src="${p.src}" loading="lazy"><div class="photo-date">${p.date}</div><button class="photo-del" data-del-photo="${i}">✕</button></div>`).join('');return`<div class="sec-head"><span class="sec-title">Fotos de Progresso</span><span style="font-size:.68rem;color:var(--tx2)">${photos.length}/20</span></div><div class="photo-grid">${thumbs}<button class="photo-add-btn" data-add-photo>${ico('plus',20,'#7A8898')}<span>Adicionar</span></button></div>`;}
+document.getElementById('photo-input').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;compressPhoto(file,src=>{const photos=[...(DB.get('progress-photos')||[])];if(photos.length>=20){alert('Limite de 20 fotos atingido. Remova uma foto antes de adicionar.');return;}photos.unshift({date:todayISO(),src});DB.set('progress-photos',photos);remountContent();});e.target.value='';});
+
+// ── mount com animação ─────────────────────────────────────────────
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').catch(()=>{});});}
+initOnboarding();
 mount();
 </script>
 </body>
