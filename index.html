@@ -391,107 +391,121 @@ function exProgressChart(exId,dayId){
   return`<div style="padding:8px 12px 6px;border-top:1px solid var(--bd)"><div style="font-size:.65rem;font-weight:700;color:var(--tx2);letter-spacing:.06em;margin-bottom:6px">EVOLUÇÃO DE CARGA</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:42px"><path d="${area}" fill="var(--ru)" opacity="0.12"/><path d="${line}" fill="none" stroke="var(--ru)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>${pts.map((p,i)=>`<circle cx="${cx(i).toFixed(1)}" cy="${cy(p.kg).toFixed(1)}" r="2.5" fill="${i===n-1?'var(--ru)':'var(--sf2)'}" stroke="var(--ru)" stroke-width="1.2"/>`).join('')}</svg><div style="display:flex;justify-content:space-between;font-family:var(--mo);font-size:.62rem;color:var(--tx2);margin-top:3px"><span>${pts[0].date.slice(5)}</span><span style="color:var(--ru);font-weight:700">Máx ${maxKg}kg</span><span>${pts[n-1].date.slice(5)}</span></div></div>`;
 }
 function muscColor(g,counts,max,highlight){
-  if(highlight)return highlight.includes(g)?'#35CC60':'#080808';
-  const n=counts[g]||0;if(!n)return '#080808';
+  if(highlight)return highlight.includes(g)?'#35CC60':'#0A0A0A';
+  const n=counts[g]||0;if(!n)return '#0A0A0A';
   const t=Math.min(1,n/(max||1));
   if(t>0.75)return '#E83828';if(t>0.5)return '#D04030';if(t>0.25)return '#C08070';return '#E8B4A8';
 }
 function bodyPaths(view,counts,max,highlight){
   const mc=g=>muscColor(g,counts,max,highlight);
-  const sk='#000000';const base='#080808';
-  const sw='stroke-width="0.7"';
-  const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x}/>`;
+  const sk='#000000';const base='#0C0C0C';
   const hl=g=>(highlight&&highlight.includes(g))?'filter="url(#glow)"':'';
-  const gry='#2A3A4A';
-  const pg=d=>`<path d="${d}" fill="${gry}" stroke="${sk}" ${sw}/>`;
-  const sil=`<path d="M 77 2 C 92 2 98 13 96 27 C 94 39 87 48 82 50 C 86 54 88 60 88 68 C 104 72 120 82 130 96 C 138 110 138 126 130 138 C 126 142 120 144 118 144 C 118 160 116 174 113 192 C 110 210 110 228 111 250 C 111 262 113 272 111 282 L 96 282 C 95 270 94 258 93 248 L 77 248 C 61 248 60 258 59 270 L 58 282 L 43 282 C 41 272 43 262 43 250 C 44 228 44 210 41 192 C 38 174 36 160 36 144 C 34 144 28 142 24 138 C 16 126 16 110 24 96 C 34 82 50 72 66 68 C 66 60 68 54 72 50 C 67 48 60 39 58 27 C 56 13 62 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1.1"/>`;
-  if(view==='front')return sil+`
-    ${p('trapezius','M 73 50 C 67 54 61 62 58 70 L 77 68 Z',hl('trapezius'))}
-    ${p('trapezius','M 81 50 C 87 54 93 62 96 70 L 77 68 Z',hl('trapezius'))}
-    ${p('chest','M 57 74 C 45 86 39 100 37 116 C 35 132 39 150 51 162 C 59 170 68 172 77 170 L 77 74 Z',hl('chest'))}
-    ${p('chest','M 97 74 C 109 86 115 100 117 116 C 119 132 115 150 103 162 C 95 170 86 172 77 170 L 77 74 Z',hl('chest'))}
-    <line x1="77" y1="74" x2="77" y2="170" stroke="${sk}" stroke-width="0.85" opacity="0.52"/>
-    <path d="M 46 157 C 41 167 40 178 42 186 M 50 165 C 45 175 44 187 46 195 M 55 171 C 51 182 50 193 52 200" fill="none" stroke="${mc('chest')}" stroke-width="2.8" stroke-linecap="round" opacity="0.5"/>
-    <path d="M 108 157 C 113 167 114 178 112 186 M 104 165 C 109 175 110 187 108 195 M 99 171 C 103 182 104 193 102 200" fill="none" stroke="${mc('chest')}" stroke-width="2.8" stroke-linecap="round" opacity="0.5"/>
-    ${p('shoulders','M 57 70 C 43 76 31 90 25 104 C 19 118 21 134 27 142 L 37 134 C 31 120 33 104 43 92 C 51 82 65 72 77 70 Z',hl('shoulders'))}
-    ${p('shoulders','M 97 70 C 111 76 123 90 129 104 C 135 118 133 134 127 142 L 117 134 C 123 120 121 104 111 92 C 103 82 89 72 77 70 Z',hl('shoulders'))}
-    ${p('biceps','M 25 130 C 15 146 11 166 11 184 C 11 200 15 214 21 222 L 35 216 C 33 200 31 182 31 164 C 31 148 33 132 35 124 Z',hl('biceps'))}
-    ${p('biceps','M 129 130 C 139 146 143 166 143 184 C 143 200 139 214 133 222 L 119 216 C 121 200 123 182 123 164 C 123 148 121 132 119 124 Z',hl('biceps'))}
-    ${p('forearm','M 21 220 C 11 242 7 264 9 282 C 11 296 19 306 35 310 L 39 302 C 37 286 35 268 35 252 C 35 236 35 220 35 214 Z',hl('forearm'))}
-    ${p('forearm','M 133 220 C 143 242 147 264 145 282 C 143 296 135 306 119 310 L 115 302 C 117 286 119 268 119 252 C 119 236 119 220 119 214 Z',hl('forearm'))}
-    ${p('core','M 37 174 C 32 198 30 224 32 248 C 33 262 39 274 45 280 L 66 282 L 66 176 Z','opacity="0.76" '+hl('core'))}
-    ${p('core','M 117 174 C 122 198 124 224 122 248 C 121 262 115 274 109 280 L 88 282 L 88 176 Z','opacity="0.76" '+hl('core'))}
-    <rect x="66" y="178" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="78" y="178" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="65" y="193" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="79" y="193" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="64" y="208" width="10" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="80" y="208" width="10" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <line x1="77" y1="176" x2="77" y2="282" stroke="${sk}" stroke-width="0.78" opacity="0.48"/>
-    <path d="M 58 254 L 58 268 Q 67 273 77 273 Q 87 273 96 268 L 96 254" fill="${mc('core')}" stroke="${sk}" ${sw} opacity="0.48"/>
-    ${p('quads','M 43 284 L 62 284 C 60 308 57 336 59 360 C 61 378 68 392 75 396 L 75 398 L 77 286 Z',hl('quads'))}
-    ${p('quads','M 111 284 L 92 284 C 94 308 97 336 95 360 C 93 378 86 392 79 396 L 79 398 L 77 286 Z',hl('quads'))}
-    ${p('quads','M 41 284 C 33 306 28 332 30 356 C 32 374 41 388 57 394 L 62 284 Z','opacity="0.86" '+hl('quads'))}
-    ${p('quads','M 113 284 C 121 306 126 332 124 356 C 122 374 113 388 97 394 L 92 284 Z','opacity="0.86" '+hl('quads'))}
-    ${p('quads','M 62 352 C 59 366 63 378 70 384 L 77 386 L 77 364 Z','opacity="0.95" '+hl('quads'))}
-    ${p('quads','M 92 352 C 95 366 91 378 84 384 L 77 386 L 77 364 Z','opacity="0.95" '+hl('quads'))}
-    <path d="M 62 284 L 54 284 C 52 308 52 334 54 356 C 56 372 60 384 65 390 L 57 396 Z" fill="${mc('quads')}" stroke="${sk}" ${sw} opacity="0.46"/>
-    <path d="M 92 284 L 100 284 C 102 308 102 334 100 356 C 98 372 94 384 89 390 L 97 396 Z" fill="${mc('quads')}" stroke="${sk}" ${sw} opacity="0.46"/>
-    <path d="M 62 290 C 60 324 59 356 60 382" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.3"/>
-    <path d="M 92 290 C 94 324 95 356 94 382" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.3"/>
-    ${pg('M 41 398 C 33 418 30 440 32 456 C 34 468 42 472 56 472 L 71 472 L 71 398 Z')}
-    ${pg('M 113 398 C 121 418 124 440 122 456 C 120 468 112 472 98 472 L 83 472 L 83 398 Z')}
-    `;
-  return sil+`
-    ${p('trapezius','M 73 50 C 65 54 59 62 57 70 L 77 80 Z',hl('trapezius'))}
-    ${p('trapezius','M 81 50 C 89 54 95 62 97 70 L 77 80 Z',hl('trapezius'))}
-    ${p('trapezius','M 57 70 C 43 80 29 94 23 110 C 17 126 17 144 23 154 L 37 144 C 31 128 33 110 45 96 C 53 84 67 76 79 74 Z',hl('trapezius'))}
-    ${p('trapezius','M 97 70 C 111 80 125 94 131 110 C 137 126 137 144 131 154 L 117 144 C 123 128 121 110 109 96 C 101 84 87 76 75 74 Z',hl('trapezius'))}
-    ${p('trapezius','M 23 154 C 26 176 52 190 77 192 Z','opacity="0.6" '+hl('trapezius'))}
-    ${p('trapezius','M 131 154 C 128 176 102 190 77 192 Z','opacity="0.6" '+hl('trapezius'))}
-    ${p('back','M 37 140 C 21 172 17 210 19 246 C 21 272 35 286 63 290 L 77 292 L 77 88 C 64 92 46 108 40 128 Z',hl('back'))}
-    ${p('back','M 117 140 C 133 172 137 210 135 246 C 133 272 119 286 91 290 L 77 292 L 77 88 C 90 92 108 108 114 128 Z',hl('back'))}
-    ${p('back','M 65 88 C 60 114 60 144 64 162 L 77 166 Z','opacity="0.42" '+hl('back'))}
-    ${p('back','M 89 88 C 94 114 94 144 90 162 L 77 166 Z','opacity="0.42" '+hl('back'))}
-    <rect x="70" y="192" width="7" height="76" rx="3.5" fill="${mc('back')}" stroke="${sk}" ${sw} opacity="0.72"/>
-    <rect x="77" y="192" width="7" height="76" rx="3.5" fill="${mc('back')}" stroke="${sk}" ${sw} opacity="0.72"/>
-    <line x1="77" y1="88" x2="77" y2="290" stroke="${sk}" stroke-width="0.74" opacity="0.5"/>
-    ${p('shoulders','M 21 108 C 13 126 13 144 19 154 L 33 144 C 29 130 29 114 35 102 Z',hl('shoulders'))}
-    ${p('shoulders','M 133 108 C 141 126 141 144 135 154 L 121 144 C 125 130 125 114 119 102 Z',hl('shoulders'))}
-    ${p('triceps','M 17 132 C 7 156 5 180 7 200 C 9 216 15 228 23 234 L 37 226 C 35 210 33 190 33 172 C 33 154 35 136 37 126 Z',hl('triceps'))}
-    ${p('triceps','M 137 132 C 147 156 149 180 147 200 C 145 216 139 228 131 234 L 117 226 C 119 210 121 190 121 172 C 121 154 119 136 117 126 Z',hl('triceps'))}
-    ${p('forearm','M 23 232 C 11 254 7 276 9 296 C 11 310 19 320 37 324 L 41 316 C 39 300 37 280 37 264 C 37 248 37 230 37 224 Z',hl('forearm'))}
-    ${p('forearm','M 131 232 C 143 254 147 276 145 296 C 143 310 135 320 117 324 L 113 316 C 115 300 117 280 117 264 C 117 248 117 230 117 224 Z',hl('forearm'))}
-    ${p('glutes','M 41 292 C 31 318 28 346 32 372 C 36 394 50 408 69 412 L 77 412 L 77 294 Z',hl('glutes'))}
-    ${p('glutes','M 113 292 C 123 318 126 346 122 372 C 118 394 104 408 85 412 L 77 412 L 77 294 Z',hl('glutes'))}
-    <line x1="77" y1="292" x2="77" y2="408" stroke="${sk}" stroke-width="0.74" opacity="0.44"/>
-    <path d="M 32 372 C 52 386 77 390 77 390 C 77 390 102 386 122 372" fill="none" stroke="${sk}" stroke-width="0.52" opacity="0.28"/>
-    ${p('hamstrings','M 30 412 C 22 438 19 464 21 484 C 23 498 33 508 52 512 L 74 514 L 77 414 Z',hl('hamstrings'))}
-    ${p('hamstrings','M 124 412 C 132 438 135 464 133 484 C 131 498 121 508 102 512 L 80 514 L 77 414 Z',hl('hamstrings'))}
-    <line x1="77" y1="412" x2="77" y2="512" stroke="${sk}" stroke-width="0.6" opacity="0.38"/>
-    ${p('calves','M 21 514 C 14 528 16 536 22 538 L 56 538 L 56 514 Z',hl('calves'))}
-    ${p('calves','M 57 514 L 74 514 L 74 538 L 57 538 Z','opacity="0.68" '+hl('calves'))}
-    ${p('calves','M 133 514 C 140 528 138 536 132 538 L 98 538 L 98 514 Z',hl('calves'))}
-    ${p('calves','M 97 514 L 80 514 L 80 538 L 97 538 Z','opacity="0.68" '+hl('calves'))}
-    <line x1="55" y1="514" x2="55" y2="536" stroke="${sk}" stroke-width="0.5" opacity="0.3"/>
-    <line x1="99" y1="514" x2="99" y2="536" stroke="${sk}" stroke-width="0.5" opacity="0.3"/>
-  `;
+  const sw='stroke-width="0.75"';
+  const cid=`b${view[0]}`;
+  const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x} clip-path="url(#${cid})"/>`;
+  const ln=d=>`<path d="${d}" fill="none" stroke="${sk}" stroke-width="0.55" opacity="0.5" clip-path="url(#${cid})"/>`;
+  // Body silhouette components — used as clipPath AND base fill
+  const comps=`<circle cx="77" cy="20" r="17"/>
+<path d="M 69 36 L 69 54 L 85 54 L 85 36 Z"/>
+<path d="M 40 52 C 62 50 92 50 114 52 L 114 68 C 112 92 110 132 108 166 C 106 186 106 204 106 218 C 104 232 100 246 94 252 L 77 256 L 60 252 C 54 246 50 232 48 218 C 48 204 48 186 46 166 C 44 132 42 92 40 68 Z"/>
+<path d="M 38 52 C 34 62 28 82 24 110 C 20 134 20 158 20 164 L 20 218 C 20 230 22 238 24 242 L 30 244 L 30 220 L 30 164 C 32 158 32 138 34 112 C 38 88 42 66 44 58 Z"/>
+<path d="M 116 52 C 120 62 126 82 130 110 C 134 134 134 158 134 164 L 134 218 C 134 230 132 238 130 242 L 124 244 L 124 220 L 124 164 C 122 158 122 138 120 112 C 116 88 112 66 110 58 Z"/>
+<path d="M 46 220 C 44 236 42 254 42 270 C 40 302 40 332 40 348 C 40 370 42 394 44 416 L 44 448 L 72 448 L 72 416 C 72 394 72 370 72 348 C 72 332 74 302 74 270 C 74 254 72 236 70 222 Z"/>
+<path d="M 108 220 C 110 236 112 254 112 270 C 114 302 114 332 114 348 C 114 370 112 394 110 416 L 110 448 L 82 448 L 82 416 C 82 394 82 370 82 348 C 82 332 80 302 80 270 C 80 254 82 236 84 222 Z"/>`;
+  if(view==='front')return`
+<defs><clipPath id="${cid}">${comps}</clipPath></defs>
+<g clip-path="url(#${cid})"><rect width="155" height="460" fill="${base}"/></g>
+${p('trapezius','M 70 38 C 62 44 50 50 40 54 L 44 68 C 52 62 66 56 72 52 Z',hl('trapezius'))}
+${p('trapezius','M 84 38 C 92 44 104 50 114 54 L 110 68 C 102 62 88 56 82 52 Z',hl('trapezius'))}
+${p('shoulders','M 38 52 C 32 64 26 82 24 108 C 22 126 24 142 30 152 C 36 144 38 128 38 106 C 38 84 40 66 44 58 Z',hl('shoulders'))}
+${p('shoulders','M 116 52 C 122 64 128 82 130 108 C 132 126 130 142 124 152 C 118 144 116 128 116 106 C 116 84 114 66 110 58 Z',hl('shoulders'))}
+${p('chest','M 44 68 C 42 92 44 118 52 144 C 58 162 68 168 77 168 L 77 68 Z',hl('chest'))}
+${p('chest','M 110 68 C 112 92 110 118 102 144 C 96 162 86 168 77 168 L 77 68 Z',hl('chest'))}
+${ln('M 77 68 L 77 168')}
+${p('biceps','M 28 150 C 22 158 20 166 20 172 L 20 220 L 30 222 L 30 174 C 32 168 36 160 36 152 Z',hl('biceps'))}
+${p('biceps','M 126 150 C 132 158 134 166 134 172 L 134 220 L 124 222 L 124 174 C 122 168 118 160 118 152 Z',hl('biceps'))}
+${p('forearm','M 20 220 L 20 244 L 30 244 L 30 222 Z',hl('forearm'))}
+${p('forearm','M 134 220 L 134 244 L 124 244 L 124 222 Z',hl('forearm'))}
+<rect x="64" y="172" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+<rect x="80" y="172" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+<rect x="63" y="188" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+<rect x="81" y="188" width="11" height="13" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+<rect x="62" y="204" width="11" height="11" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+<rect x="82" y="204" width="11" height="11" rx="3" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')} clip-path="url(#${cid})"/>
+${p('core','M 47 168 C 44 184 46 206 50 220 C 54 232 58 244 62 250 L 62 208 C 60 196 56 180 56 170 Z','opacity="0.72" '+hl('core'))}
+${p('core','M 107 168 C 110 184 108 206 104 220 C 100 232 96 244 92 250 L 92 208 C 94 196 98 180 98 170 Z','opacity="0.72" '+hl('core'))}
+${ln('M 77 170 L 77 256')}
+${p('quads','M 42 258 C 40 280 40 312 40 348 C 42 360 50 370 62 372 L 66 360 L 68 338 C 68 310 72 282 72 260 Z',hl('quads'))}
+${p('quads','M 112 258 C 114 280 114 312 114 348 C 112 360 104 370 92 372 L 88 360 L 86 338 C 86 310 82 282 82 260 Z',hl('quads'))}
+${p('quads','M 62 256 L 82 256 C 80 282 80 314 78 344 L 77 368 L 76 344 C 74 314 74 282 72 256 Z','opacity="0.88" '+hl('quads'))}
+${p('quads','M 60 348 C 56 360 60 372 68 376 L 72 376 L 72 350 Z','opacity="0.92" '+hl('quads'))}
+${p('quads','M 94 348 C 98 360 94 372 86 376 L 82 376 L 82 350 Z','opacity="0.92" '+hl('quads'))}
+<g fill="none" stroke="${sk}" stroke-width="1.05" clip-path="url(#${cid})">
+  <circle cx="77" cy="20" r="17"/>
+  <path d="M 69 37 L 69 54 M 85 37 L 85 54"/>
+  <path d="M 40 54 C 62 52 92 52 114 54"/>
+  <path d="M 38 52 C 32 64 26 80 22 112 C 20 136 20 160 20 166 L 20 220 C 20 234 24 242 30 244"/>
+  <path d="M 44 58 C 42 68 40 88 40 112 C 40 132 40 150 38 158"/>
+  <path d="M 116 52 C 122 64 128 80 132 112 C 134 136 134 160 134 166 L 134 220 C 134 234 130 242 124 244"/>
+  <path d="M 110 58 C 112 68 114 88 114 112 C 114 132 114 150 116 158"/>
+  <path d="M 40 54 L 40 70 C 42 94 44 134 46 168 C 48 188 48 204 48 220 C 48 234 50 248 60 254 L 77 258"/>
+  <path d="M 114 54 L 114 70 C 112 94 110 134 108 168 C 106 188 106 204 106 220 C 106 234 104 248 94 254 L 77 258"/>
+  <path d="M 42 256 C 40 282 40 316 40 348 C 40 372 42 396 44 418 L 44 448 L 72 448 L 72 418 C 72 396 72 372 72 348 C 72 316 74 282 74 258"/>
+  <path d="M 112 256 C 114 282 114 316 114 348 C 114 372 112 396 110 418 L 110 448 L 82 448 L 82 418 C 82 396 82 372 82 348 C 82 316 80 282 80 258"/>
+</g>`;
+  return`
+<defs><clipPath id="${cid}">${comps}</clipPath></defs>
+<g clip-path="url(#${cid})"><rect width="155" height="460" fill="${base}"/></g>
+${p('trapezius','M 70 38 C 60 46 46 54 40 62 L 44 92 C 52 82 64 72 72 62 Z',hl('trapezius'))}
+${p('trapezius','M 84 38 C 94 46 108 54 114 62 L 110 92 C 102 82 90 72 82 62 Z',hl('trapezius'))}
+${p('trapezius','M 40 62 C 44 92 46 120 44 144 L 77 150 L 110 144 C 108 120 110 92 114 62 Z',hl('trapezius'))}
+${p('shoulders','M 38 52 C 30 62 24 82 22 108 C 20 126 22 142 28 152 C 34 144 38 126 38 104 C 38 82 40 66 44 58 Z',hl('shoulders'))}
+${p('shoulders','M 116 52 C 124 62 130 82 132 108 C 134 126 132 142 126 152 C 120 144 116 126 116 104 C 116 82 114 66 110 58 Z',hl('shoulders'))}
+${p('back','M 40 68 C 38 90 38 120 40 150 C 42 170 46 192 48 214 C 50 228 54 244 62 252 L 77 256 L 77 150 Z',hl('back'))}
+${p('back','M 114 68 C 116 90 116 120 114 150 C 112 170 108 192 106 214 C 104 228 100 244 92 252 L 77 256 L 77 150 Z',hl('back'))}
+<rect x="71" y="154" width="5" height="76" rx="2.5" fill="${mc('back')}" stroke="${sk}" stroke-width="0.6" opacity="0.78" clip-path="url(#${cid})"/>
+<rect x="79" y="154" width="5" height="76" rx="2.5" fill="${mc('back')}" stroke="${sk}" stroke-width="0.6" opacity="0.78" clip-path="url(#${cid})"/>
+${ln('M 77 54 L 77 256')}
+${p('triceps','M 28 152 C 22 160 20 168 20 174 L 20 220 L 30 222 L 30 176 C 32 170 36 162 36 154 Z',hl('triceps'))}
+${p('triceps','M 126 152 C 132 160 134 168 134 174 L 134 220 L 124 222 L 124 176 C 122 170 118 162 118 154 Z',hl('triceps'))}
+${p('forearm','M 20 220 L 20 244 L 30 244 L 30 222 Z',hl('forearm'))}
+${p('forearm','M 134 220 L 134 244 L 124 244 L 124 222 Z',hl('forearm'))}
+${p('glutes','M 42 258 C 40 274 40 296 44 314 C 48 330 58 338 72 340 L 72 258 Z',hl('glutes'))}
+${p('glutes','M 112 258 C 114 274 114 296 110 314 C 106 330 96 338 82 340 L 82 258 Z',hl('glutes'))}
+${ln('M 77 256 L 77 338')}
+${p('hamstrings','M 40 346 C 40 368 42 394 44 416 L 44 448 L 72 448 L 72 416 C 72 394 72 368 72 346 C 64 350 52 350 40 346 Z',hl('hamstrings'))}
+${p('hamstrings','M 114 346 C 114 368 112 394 110 416 L 110 448 L 82 448 L 82 416 C 82 394 82 368 82 346 C 92 350 104 350 114 346 Z',hl('hamstrings'))}
+${p('calves','M 40 418 C 40 430 44 442 48 446 L 64 448 L 72 447 C 70 436 70 424 70 418 Z',hl('calves'))}
+${p('calves','M 114 418 C 114 430 110 442 106 446 L 90 448 L 82 447 C 84 436 84 424 84 418 Z',hl('calves'))}
+<g fill="none" stroke="${sk}" stroke-width="1.05" clip-path="url(#${cid})">
+  <circle cx="77" cy="20" r="17"/>
+  <path d="M 69 37 L 69 54 M 85 37 L 85 54"/>
+  <path d="M 40 54 C 62 52 92 52 114 54"/>
+  <path d="M 38 52 C 32 64 26 80 22 112 C 20 136 20 160 20 166 L 20 220 C 20 234 24 242 30 244"/>
+  <path d="M 44 58 C 42 68 40 88 40 112 C 40 132 40 150 38 158"/>
+  <path d="M 116 52 C 122 64 128 80 132 112 C 134 136 134 160 134 166 L 134 220 C 134 234 130 242 124 244"/>
+  <path d="M 110 58 C 112 68 114 88 114 112 C 114 132 114 150 116 158"/>
+  <path d="M 40 54 L 40 70 C 42 94 44 134 46 168 C 48 188 48 204 48 220 C 48 234 50 248 60 254 L 77 258"/>
+  <path d="M 114 54 L 114 70 C 112 94 110 134 108 168 C 106 188 106 204 106 220 C 106 234 104 248 94 254 L 77 258"/>
+  <path d="M 42 256 C 40 282 40 316 40 348 C 40 372 42 396 44 418 L 44 448 L 72 448 L 72 418 C 72 396 72 372 72 348 C 72 316 74 282 74 258"/>
+  <path d="M 112 256 C 114 282 114 316 114 348 C 114 372 112 396 110 418 L 110 448 L 82 448 L 82 418 C 82 396 82 372 82 348 C 82 316 80 282 80 258"/>
+</g>`;
 }
 function buildBodySVG(counts,max,highlight){
-  const sk='#182438';
+  const nav='#182438';
   const front=bodyPaths('front',counts,max,highlight);
   const back=bodyPaths('back',counts,max,highlight);
-  const glowF=`<filter id="glow" x="-50%" y="-30%" width="200%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
-  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4A5A6A"/><stop offset="25%" stop-color="#E8B4A8"/><stop offset="65%" stop-color="#D04030"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
-  const legend=highlight?'':`<rect x="50" y="484" width="210" height="7" rx="3.5" fill="url(#lg)"/><text x="50" y="502" font-size="10" fill="#5A6878" font-family="system-ui">0</text><text x="260" y="502" font-size="10" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
-  const h=highlight?450:512;
+  const glowF=`<filter id="glow" x="-30%" y="-20%" width="160%" height="140%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4A5A6A"/><stop offset="30%" stop-color="#E8B4A8"/><stop offset="70%" stop-color="#D04030"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
+  const legend=highlight?'':`<rect x="42" y="476" width="226" height="7" rx="3.5" fill="url(#lg)"/><text x="42" y="494" font-size="9" fill="#5A6878" font-family="system-ui">0</text><text x="268" y="494" font-size="9" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
+  const h=highlight?462:502;
   return`<svg viewBox="0 0 310 ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
     <defs>${glowF}${legGrad}</defs>
-    <rect width="310" height="${h}" fill="${sk}" rx="12"/>
-    <text x="84" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">FRENTE</text>
-    <text x="238" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">COSTAS</text>
-    <g transform="translate(7,16)">${front}</g>
-    <g transform="translate(161,16) scale(1,0.88)">${back}</g>
+    <rect width="310" height="${h}" fill="${nav}" rx="12"/>
+    <text x="80" y="12" text-anchor="middle" font-size="8" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">FRENTE</text>
+    <text x="234" y="12" text-anchor="middle" font-size="8" font-weight="700" fill="#4A6078" letter-spacing="1" font-family="system-ui">COSTAS</text>
+    <g transform="translate(3,14)">${front}</g>
+    <g transform="translate(157,14)">${back}</g>
     ${legend}
   </svg>`;
 }
