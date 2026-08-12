@@ -391,77 +391,90 @@ function exProgressChart(exId,dayId){
   return`<div style="padding:8px 12px 6px;border-top:1px solid var(--bd)"><div style="font-size:.65rem;font-weight:700;color:var(--tx2);letter-spacing:.06em;margin-bottom:6px">EVOLUÇÃO DE CARGA</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:42px"><path d="${area}" fill="var(--ru)" opacity="0.12"/><path d="${line}" fill="none" stroke="var(--ru)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>${pts.map((p,i)=>`<circle cx="${cx(i).toFixed(1)}" cy="${cy(p.kg).toFixed(1)}" r="2.5" fill="${i===n-1?'var(--ru)':'var(--sf2)'}" stroke="var(--ru)" stroke-width="1.2"/>`).join('')}</svg><div style="display:flex;justify-content:space-between;font-family:var(--mo);font-size:.62rem;color:var(--tx2);margin-top:3px"><span>${pts[0].date.slice(5)}</span><span style="color:var(--ru);font-weight:700">Máx ${maxKg}kg</span><span>${pts[n-1].date.slice(5)}</span></div></div>`;
 }
 function muscColor(g,counts,max,highlight){
-  if(highlight)return highlight.includes(g)?'#35CC60':'#111E30';
-  const n=counts[g]||0;if(!n)return '#111E30';
+  if(highlight)return highlight.includes(g)?'#35CC60':'#0D1820';
+  const n=counts[g]||0;if(!n)return '#0D1820';
   const t=Math.min(1,n/(max||1));
-  if(t>0.75)return '#E83828';if(t>0.5)return '#CC3022';if(t>0.25)return '#A86060';return '#886060';
+  if(t>0.75)return '#E83828';if(t>0.5)return '#CC3022';if(t>0.25)return '#A85840';return '#7A4840';
 }
 function bodyPaths(view,counts,max,highlight){
   const mc=g=>muscColor(g,counts,max,highlight);
-  const sk='#060C16';const base='#111E30';
+  const sk='#040A14';const base='#0D1820';
   const sw='stroke-width="0.65"';
   const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x}/>`;
   const hl=g=>(highlight&&highlight.includes(g))?'filter="url(#glow)"':'';
-  const gry='#263040';
+  const gry='#1A2A38';
   const pg=d=>`<path d="${d}" fill="${gry}" stroke="${sk}" ${sw}/>`;
-  // Silhueta muscular: ombros ~112px largura, cintura ~72px, figura atlética
-  const sil=`<path d="M 77 2 C 92 2 98 13 96 27 C 94 39 87 48 82 50 C 86 54 88 60 88 68 C 104 72 120 82 130 96 C 138 110 138 126 130 138 C 126 142 120 144 118 144 C 118 160 116 174 113 192 C 110 210 110 228 111 250 C 111 262 113 272 111 282 L 96 282 C 95 270 94 258 93 248 L 77 248 C 61 248 60 258 59 270 L 58 282 L 43 282 C 41 272 43 262 43 250 C 44 228 44 210 41 192 C 38 174 36 160 36 144 C 34 144 28 142 24 138 C 16 126 16 110 24 96 C 34 82 50 72 66 68 C 66 60 68 54 72 50 C 67 48 60 39 58 27 C 56 13 62 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1"/>`;
+  const sil=`<path d="M 77 2 C 92 2 98 13 96 27 C 94 39 87 48 82 50 C 86 54 88 60 88 68 C 104 72 120 82 130 96 C 138 110 138 126 130 138 C 126 142 120 144 118 144 C 118 160 116 174 113 192 C 110 210 110 228 111 250 C 111 262 113 272 111 282 L 96 282 C 95 270 94 258 93 248 L 77 248 C 61 248 60 258 59 270 L 58 282 L 43 282 C 41 272 43 262 43 250 C 44 228 44 210 41 192 C 38 174 36 160 36 144 C 34 144 28 142 24 138 C 16 126 16 110 24 96 C 34 82 50 72 66 68 C 66 60 68 54 72 50 C 67 48 60 39 58 27 C 56 13 62 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1.1"/>`;
   if(view==='front')return sil+`
-    ${p('chest','M 77 80 L 77 186 C 62 182 50 168 44 154 C 38 140 38 124 46 110 C 54 96 66 86 77 80 Z',hl('chest'))}
-    ${p('chest','M 77 80 L 77 186 C 92 182 104 168 110 154 C 116 140 116 124 108 110 C 100 96 88 86 77 80 Z',hl('chest'))}
-    <line x1="77" y1="80" x2="77" y2="186" stroke="${sk}" stroke-width="0.9" opacity="0.5"/>
-    <path d="M 52 76 Q 64 70 77 70 Q 90 70 102 76" stroke="${sk}" stroke-width="0.45" fill="none" opacity="0.3"/>
-    ${p('shoulders','M 36 136 C 22 122 20 104 28 90 C 36 76 54 70 70 68 L 74 82 C 58 86 46 98 42 114 Z',hl('shoulders'))}
-    ${p('shoulders','M 118 136 C 132 122 134 104 126 90 C 118 76 100 70 84 68 L 80 82 C 96 86 108 98 112 114 Z',hl('shoulders'))}
-    ${p('biceps','M 22 132 C 12 146 8 168 8 188 C 8 204 14 218 22 224 L 36 220 C 34 204 34 186 36 170 C 36 152 30 140 28 134 Z',hl('biceps'))}
-    ${p('biceps','M 132 132 C 142 146 146 168 146 188 C 146 204 140 218 132 224 L 118 220 C 120 204 120 186 118 170 C 118 152 124 140 126 134 Z',hl('biceps'))}
-    ${p('forearm','M 22 222 C 12 244 8 266 10 284 C 12 298 20 310 34 316 L 38 310 C 36 294 36 274 36 254 C 36 236 36 222 36 218 Z',hl('forearm'))}
-    ${p('forearm','M 132 222 C 142 244 146 266 144 284 C 142 298 134 310 120 316 L 116 310 C 118 294 118 274 118 254 C 118 236 118 222 118 218 Z',hl('forearm'))}
-    ${p('core','M 36 188 C 30 210 28 232 30 254 C 32 266 38 276 44 282 L 70 284 L 70 190 Z','opacity="0.85" '+hl('core'))}
-    ${p('core','M 118 188 C 124 210 126 232 124 254 C 122 266 116 276 110 282 L 84 284 L 84 190 Z','opacity="0.85" '+hl('core'))}
-    <rect x="66" y="194" width="11" height="13" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="194" width="11" height="13" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="66" y="210" width="11" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="210" width="11" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="66" y="225" width="11" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <rect x="77" y="225" width="11" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
-    <line x1="77" y1="194" x2="77" y2="284" stroke="${sk}" stroke-width="0.8" opacity="0.48"/>
-    ${p('quads','M 41 282 C 33 304 28 330 30 356 C 32 376 42 390 56 396 L 75 398 L 77 284 Z',hl('quads'))}
-    ${p('quads','M 113 282 C 121 304 126 330 124 356 C 122 376 112 390 98 396 L 79 398 L 77 284 Z',hl('quads'))}
-    <path d="M 60 290 C 58 322 57 352 58 384" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.36"/>
-    <path d="M 94 290 C 96 322 97 352 96 384" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.36"/>
-    ${pg('M 42 398 C 35 416 32 436 34 452 C 36 462 44 464 56 464 L 73 464 L 73 398 Z')}
-    ${pg('M 112 398 C 119 416 122 436 120 452 C 118 462 110 464 98 464 L 81 464 L 81 398 Z')}
+    ${p('trapezius','M 73 50 C 67 54 61 62 58 70 L 77 68 Z',hl('trapezius'))}
+    ${p('trapezius','M 81 50 C 87 54 93 62 96 70 L 77 68 Z',hl('trapezius'))}
+    ${p('chest','M 57 74 C 45 86 39 100 37 116 C 35 132 39 150 51 162 C 59 170 68 172 77 170 L 77 74 Z',hl('chest'))}
+    ${p('chest','M 97 74 C 109 86 115 100 117 116 C 119 132 115 150 103 162 C 95 170 86 172 77 170 L 77 74 Z',hl('chest'))}
+    <line x1="77" y1="74" x2="77" y2="170" stroke="${sk}" stroke-width="0.85" opacity="0.52"/>
+    <path d="M 46 157 C 41 167 40 178 42 186 M 50 165 C 45 175 44 187 46 195 M 55 171 C 51 182 50 193 52 200" fill="none" stroke="${mc('chest')}" stroke-width="2.8" stroke-linecap="round" opacity="0.5"/>
+    <path d="M 108 157 C 113 167 114 178 112 186 M 104 165 C 109 175 110 187 108 195 M 99 171 C 103 182 104 193 102 200" fill="none" stroke="${mc('chest')}" stroke-width="2.8" stroke-linecap="round" opacity="0.5"/>
+    ${p('shoulders','M 57 70 C 43 76 31 90 25 104 C 19 118 21 134 27 142 L 37 134 C 31 120 33 104 43 92 C 51 82 65 72 77 70 Z',hl('shoulders'))}
+    ${p('shoulders','M 97 70 C 111 76 123 90 129 104 C 135 118 133 134 127 142 L 117 134 C 123 120 121 104 111 92 C 103 82 89 72 77 70 Z',hl('shoulders'))}
+    ${p('biceps','M 25 130 C 15 146 11 166 11 184 C 11 200 15 214 21 222 L 35 216 C 33 200 31 182 31 164 C 31 148 33 132 35 124 Z',hl('biceps'))}
+    ${p('biceps','M 129 130 C 139 146 143 166 143 184 C 143 200 139 214 133 222 L 119 216 C 121 200 123 182 123 164 C 123 148 121 132 119 124 Z',hl('biceps'))}
+    ${p('forearm','M 21 220 C 11 242 7 264 9 282 C 11 296 19 306 35 310 L 39 302 C 37 286 35 268 35 252 C 35 236 35 220 35 214 Z',hl('forearm'))}
+    ${p('forearm','M 133 220 C 143 242 147 264 145 282 C 143 296 135 306 119 310 L 115 302 C 117 286 119 268 119 252 C 119 236 119 220 119 214 Z',hl('forearm'))}
+    ${p('core','M 37 174 C 32 198 30 224 32 248 C 33 262 39 274 45 280 L 66 282 L 66 176 Z','opacity="0.76" '+hl('core'))}
+    ${p('core','M 117 174 C 122 198 124 224 122 248 C 121 262 115 274 109 280 L 88 282 L 88 176 Z','opacity="0.76" '+hl('core'))}
+    <rect x="66" y="178" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="78" y="178" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="65" y="193" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="79" y="193" width="10" height="12" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="64" y="208" width="10" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <rect x="80" y="208" width="10" height="11" rx="2.5" fill="${mc('core')}" stroke="${sk}" ${sw} ${hl('core')}/>
+    <line x1="77" y1="176" x2="77" y2="282" stroke="${sk}" stroke-width="0.78" opacity="0.48"/>
+    <path d="M 58 254 L 58 268 Q 67 273 77 273 Q 87 273 96 268 L 96 254" fill="${mc('core')}" stroke="${sk}" ${sw} opacity="0.48"/>
+    ${p('quads','M 43 284 L 62 284 C 60 308 57 336 59 360 C 61 378 68 392 75 396 L 75 398 L 77 286 Z',hl('quads'))}
+    ${p('quads','M 111 284 L 92 284 C 94 308 97 336 95 360 C 93 378 86 392 79 396 L 79 398 L 77 286 Z',hl('quads'))}
+    ${p('quads','M 41 284 C 33 306 28 332 30 356 C 32 374 41 388 57 394 L 62 284 Z','opacity="0.86" '+hl('quads'))}
+    ${p('quads','M 113 284 C 121 306 126 332 124 356 C 122 374 113 388 97 394 L 92 284 Z','opacity="0.86" '+hl('quads'))}
+    ${p('quads','M 62 352 C 59 366 63 378 70 384 L 77 386 L 77 364 Z','opacity="0.95" '+hl('quads'))}
+    ${p('quads','M 92 352 C 95 366 91 378 84 384 L 77 386 L 77 364 Z','opacity="0.95" '+hl('quads'))}
+    <path d="M 62 284 L 54 284 C 52 308 52 334 54 356 C 56 372 60 384 65 390 L 57 396 Z" fill="${mc('quads')}" stroke="${sk}" ${sw} opacity="0.46"/>
+    <path d="M 92 284 L 100 284 C 102 308 102 334 100 356 C 98 372 94 384 89 390 L 97 396 Z" fill="${mc('quads')}" stroke="${sk}" ${sw} opacity="0.46"/>
+    <path d="M 62 290 C 60 324 59 356 60 382" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.3"/>
+    <path d="M 92 290 C 94 324 95 356 94 382" stroke="${sk}" stroke-width="0.5" fill="none" opacity="0.3"/>
+    ${pg('M 41 398 C 33 418 30 440 32 456 C 34 468 42 472 56 472 L 71 472 L 71 398 Z')}
+    ${pg('M 113 398 C 121 418 124 440 122 456 C 120 468 112 472 98 472 L 83 472 L 83 398 Z')}
     `;
-  // Vista de costas — mesma silhueta, grupos musculares posteriores
   return sil+`
-    ${p('trapezius','M 77 50 C 70 54 62 62 60 70 L 77 66 Z',hl('trapezius'))}
-    ${p('trapezius','M 77 50 C 84 54 92 62 94 70 L 77 66 Z',hl('trapezius'))}
-    ${p('trapezius','M 77 80 C 68 86 56 96 48 108 C 42 120 40 134 44 146 L 62 140 C 60 128 62 114 70 104 C 74 96 77 90 77 80 Z',hl('trapezius'))}
-    ${p('trapezius','M 77 80 C 86 86 98 96 106 108 C 112 120 114 134 110 146 L 92 140 C 94 128 92 114 84 104 C 80 96 77 90 77 80 Z',hl('trapezius'))}
-    ${p('trapezius','M 44 146 C 46 164 60 174 77 178 Z','opacity="0.68" '+hl('trapezius'))}
-    ${p('trapezius','M 110 146 C 108 164 94 174 77 178 Z','opacity="0.68" '+hl('trapezius'))}
-    ${p('back','M 62 84 C 52 110 52 136 54 158 C 58 178 68 186 77 188 L 77 80 Z','opacity="0.52" '+hl('back'))}
-    ${p('back','M 92 84 C 102 110 102 136 100 158 C 96 178 86 186 77 188 L 77 80 Z','opacity="0.52" '+hl('back'))}
-    ${p('back','M 36 142 C 22 170 20 204 22 234 C 26 258 40 274 62 282 L 76 286 L 76 130 Z',hl('back'))}
-    ${p('back','M 118 142 C 132 170 134 204 132 234 C 128 258 114 274 92 282 L 78 286 L 78 130 Z',hl('back'))}
-    <line x1="77" y1="88" x2="77" y2="282" stroke="${sk}" stroke-width="0.7" opacity="0.4"/>
-    <path d="M 48 164 Q 63 170 77 170 Q 91 170 106 164" stroke="${sk}" stroke-width="0.4" fill="none" opacity="0.26"/>
-    ${p('shoulders','M 26 92 C 16 110 16 130 22 144 L 42 138 C 38 120 38 102 44 90 Z',hl('shoulders'))}
-    ${p('shoulders','M 128 92 C 138 110 138 130 132 144 L 112 138 C 116 120 116 102 110 90 Z',hl('shoulders'))}
-    ${p('triceps','M 18 130 C 10 152 8 174 8 194 C 8 212 14 226 22 232 L 38 228 C 36 212 36 194 36 176 C 36 158 38 140 40 132 Z',hl('triceps'))}
-    ${p('triceps','M 136 130 C 144 152 146 174 146 194 C 146 212 140 226 132 232 L 118 228 C 118 212 118 194 118 176 C 118 158 116 140 114 132 Z',hl('triceps'))}
-    ${p('forearm','M 22 230 C 12 252 10 274 13 292 C 16 306 24 316 38 320 L 42 314 C 40 300 39 282 39 264 C 39 246 40 232 40 226 Z',hl('forearm'))}
-    ${p('forearm','M 132 230 C 142 252 144 274 141 292 C 138 306 130 316 116 320 L 112 314 C 114 300 115 282 115 264 C 115 246 114 232 114 226 Z',hl('forearm'))}
-    ${p('glutes','M 41 284 C 33 308 30 334 34 360 C 38 382 50 396 68 400 L 77 400 L 77 286 Z',hl('glutes'))}
-    ${p('glutes','M 113 284 C 121 308 124 334 120 360 C 116 382 104 396 86 400 L 77 400 L 77 286 Z',hl('glutes'))}
-    <line x1="77" y1="286" x2="77" y2="398" stroke="${sk}" stroke-width="0.7" opacity="0.42"/>
-    <path d="M 34 370 C 52 382 77 386 77 386 C 77 386 102 382 120 370" stroke="${sk}" stroke-width="0.55" fill="none" opacity="0.3"/>
-    ${p('hamstrings','M 33 400 C 25 422 22 446 24 466 C 26 480 36 490 52 494 L 74 496 L 77 402 Z',hl('hamstrings'))}
-    ${p('hamstrings','M 121 400 C 129 422 132 446 130 466 C 128 480 118 490 102 494 L 80 496 L 77 402 Z',hl('hamstrings'))}
-    ${p('calves','M 24 496 C 18 512 20 522 26 526 L 74 526 L 74 496 Z',hl('calves'))}
-    ${p('calves','M 130 496 C 136 512 134 522 128 526 L 80 526 L 80 496 Z',hl('calves'))}
-    <line x1="77" y1="400" x2="77" y2="524" stroke="${sk}" stroke-width="0.5" opacity="0.3"/>
+    ${p('trapezius','M 73 50 C 65 54 59 62 57 70 L 77 80 Z',hl('trapezius'))}
+    ${p('trapezius','M 81 50 C 89 54 95 62 97 70 L 77 80 Z',hl('trapezius'))}
+    ${p('trapezius','M 57 70 C 43 80 29 94 23 110 C 17 126 17 144 23 154 L 37 144 C 31 128 33 110 45 96 C 53 84 67 76 79 74 Z',hl('trapezius'))}
+    ${p('trapezius','M 97 70 C 111 80 125 94 131 110 C 137 126 137 144 131 154 L 117 144 C 123 128 121 110 109 96 C 101 84 87 76 75 74 Z',hl('trapezius'))}
+    ${p('trapezius','M 23 154 C 26 176 52 190 77 192 Z','opacity="0.6" '+hl('trapezius'))}
+    ${p('trapezius','M 131 154 C 128 176 102 190 77 192 Z','opacity="0.6" '+hl('trapezius'))}
+    ${p('back','M 37 140 C 21 172 17 210 19 246 C 21 272 35 286 63 290 L 77 292 L 77 88 C 64 92 46 108 40 128 Z',hl('back'))}
+    ${p('back','M 117 140 C 133 172 137 210 135 246 C 133 272 119 286 91 290 L 77 292 L 77 88 C 90 92 108 108 114 128 Z',hl('back'))}
+    ${p('back','M 65 88 C 60 114 60 144 64 162 L 77 166 Z','opacity="0.42" '+hl('back'))}
+    ${p('back','M 89 88 C 94 114 94 144 90 162 L 77 166 Z','opacity="0.42" '+hl('back'))}
+    <rect x="70" y="192" width="7" height="76" rx="3.5" fill="${mc('back')}" stroke="${sk}" ${sw} opacity="0.72"/>
+    <rect x="77" y="192" width="7" height="76" rx="3.5" fill="${mc('back')}" stroke="${sk}" ${sw} opacity="0.72"/>
+    <line x1="77" y1="88" x2="77" y2="290" stroke="${sk}" stroke-width="0.74" opacity="0.5"/>
+    ${p('shoulders','M 21 108 C 13 126 13 144 19 154 L 33 144 C 29 130 29 114 35 102 Z',hl('shoulders'))}
+    ${p('shoulders','M 133 108 C 141 126 141 144 135 154 L 121 144 C 125 130 125 114 119 102 Z',hl('shoulders'))}
+    ${p('triceps','M 17 132 C 7 156 5 180 7 200 C 9 216 15 228 23 234 L 37 226 C 35 210 33 190 33 172 C 33 154 35 136 37 126 Z',hl('triceps'))}
+    ${p('triceps','M 137 132 C 147 156 149 180 147 200 C 145 216 139 228 131 234 L 117 226 C 119 210 121 190 121 172 C 121 154 119 136 117 126 Z',hl('triceps'))}
+    ${p('forearm','M 23 232 C 11 254 7 276 9 296 C 11 310 19 320 37 324 L 41 316 C 39 300 37 280 37 264 C 37 248 37 230 37 224 Z',hl('forearm'))}
+    ${p('forearm','M 131 232 C 143 254 147 276 145 296 C 143 310 135 320 117 324 L 113 316 C 115 300 117 280 117 264 C 117 248 117 230 117 224 Z',hl('forearm'))}
+    ${p('glutes','M 41 292 C 31 318 28 346 32 372 C 36 394 50 408 69 412 L 77 412 L 77 294 Z',hl('glutes'))}
+    ${p('glutes','M 113 292 C 123 318 126 346 122 372 C 118 394 104 408 85 412 L 77 412 L 77 294 Z',hl('glutes'))}
+    <line x1="77" y1="292" x2="77" y2="408" stroke="${sk}" stroke-width="0.74" opacity="0.44"/>
+    <path d="M 32 372 C 52 386 77 390 77 390 C 77 390 102 386 122 372" fill="none" stroke="${sk}" stroke-width="0.52" opacity="0.28"/>
+    ${p('hamstrings','M 30 412 C 22 438 19 464 21 484 C 23 498 33 508 52 512 L 74 514 L 77 414 Z',hl('hamstrings'))}
+    ${p('hamstrings','M 124 412 C 132 438 135 464 133 484 C 131 498 121 508 102 512 L 80 514 L 77 414 Z',hl('hamstrings'))}
+    <line x1="77" y1="412" x2="77" y2="512" stroke="${sk}" stroke-width="0.6" opacity="0.38"/>
+    ${p('calves','M 21 514 C 14 528 16 536 22 538 L 56 538 L 56 514 Z',hl('calves'))}
+    ${p('calves','M 57 514 L 74 514 L 74 538 L 57 538 Z','opacity="0.68" '+hl('calves'))}
+    ${p('calves','M 133 514 C 140 528 138 536 132 538 L 98 538 L 98 514 Z',hl('calves'))}
+    ${p('calves','M 97 514 L 80 514 L 80 538 L 97 538 Z','opacity="0.68" '+hl('calves'))}
+    <line x1="55" y1="514" x2="55" y2="536" stroke="${sk}" stroke-width="0.5" opacity="0.3"/>
+    <line x1="99" y1="514" x2="99" y2="536" stroke="${sk}" stroke-width="0.5" opacity="0.3"/>
   `;
 }
 function buildBodySVG(counts,max,highlight){
@@ -469,7 +482,7 @@ function buildBodySVG(counts,max,highlight){
   const front=bodyPaths('front',counts,max,highlight);
   const back=bodyPaths('back',counts,max,highlight);
   const glowF=`<filter id="glow" x="-50%" y="-30%" width="200%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
-  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C3D50"/><stop offset="30%" stop-color="#886060"/><stop offset="65%" stop-color="#CC3022"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
+  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C3D50"/><stop offset="30%" stop-color="#7A4840"/><stop offset="65%" stop-color="#CC3022"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
   const legend=highlight?'':`<rect x="50" y="484" width="210" height="7" rx="3.5" fill="url(#lg)"/><text x="50" y="502" font-size="10" fill="#5A6878" font-family="system-ui">0</text><text x="260" y="502" font-size="10" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
   const h=highlight?450:512;
   return`<svg viewBox="0 0 310 ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
