@@ -391,18 +391,18 @@ function exProgressChart(exId,dayId){
   return`<div style="padding:8px 12px 6px;border-top:1px solid var(--bd)"><div style="font-size:.65rem;font-weight:700;color:var(--tx2);letter-spacing:.06em;margin-bottom:6px">EVOLUÇÃO DE CARGA</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:42px"><path d="${area}" fill="var(--ru)" opacity="0.12"/><path d="${line}" fill="none" stroke="var(--ru)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>${pts.map((p,i)=>`<circle cx="${cx(i).toFixed(1)}" cy="${cy(p.kg).toFixed(1)}" r="2.5" fill="${i===n-1?'var(--ru)':'var(--sf2)'}" stroke="var(--ru)" stroke-width="1.2"/>`).join('')}</svg><div style="display:flex;justify-content:space-between;font-family:var(--mo);font-size:.62rem;color:var(--tx2);margin-top:3px"><span>${pts[0].date.slice(5)}</span><span style="color:var(--ru);font-weight:700">Máx ${maxKg}kg</span><span>${pts[n-1].date.slice(5)}</span></div></div>`;
 }
 function muscColor(g,counts,max,highlight){
-  if(highlight)return highlight.includes(g)?'#35CC60':'#0D1820';
-  const n=counts[g]||0;if(!n)return '#0D1820';
+  if(highlight)return highlight.includes(g)?'#35CC60':'#080808';
+  const n=counts[g]||0;if(!n)return '#080808';
   const t=Math.min(1,n/(max||1));
-  if(t>0.75)return '#E83828';if(t>0.5)return '#CC3022';if(t>0.25)return '#A85840';return '#7A4840';
+  if(t>0.75)return '#E83828';if(t>0.5)return '#D04030';if(t>0.25)return '#C08070';return '#E8B4A8';
 }
 function bodyPaths(view,counts,max,highlight){
   const mc=g=>muscColor(g,counts,max,highlight);
-  const sk='#040A14';const base='#0D1820';
-  const sw='stroke-width="0.65"';
+  const sk='#000000';const base='#080808';
+  const sw='stroke-width="0.7"';
   const p=(g,d,x='')=>`<path d="${d}" fill="${mc(g)}" stroke="${sk}" ${sw} ${x}/>`;
   const hl=g=>(highlight&&highlight.includes(g))?'filter="url(#glow)"':'';
-  const gry='#1A2A38';
+  const gry='#2A3A4A';
   const pg=d=>`<path d="${d}" fill="${gry}" stroke="${sk}" ${sw}/>`;
   const sil=`<path d="M 77 2 C 92 2 98 13 96 27 C 94 39 87 48 82 50 C 86 54 88 60 88 68 C 104 72 120 82 130 96 C 138 110 138 126 130 138 C 126 142 120 144 118 144 C 118 160 116 174 113 192 C 110 210 110 228 111 250 C 111 262 113 272 111 282 L 96 282 C 95 270 94 258 93 248 L 77 248 C 61 248 60 258 59 270 L 58 282 L 43 282 C 41 272 43 262 43 250 C 44 228 44 210 41 192 C 38 174 36 160 36 144 C 34 144 28 142 24 138 C 16 126 16 110 24 96 C 34 82 50 72 66 68 C 66 60 68 54 72 50 C 67 48 60 39 58 27 C 56 13 62 2 77 2 Z" fill="${base}" stroke="${sk}" stroke-width="1.1"/>`;
   if(view==='front')return sil+`
@@ -478,11 +478,11 @@ function bodyPaths(view,counts,max,highlight){
   `;
 }
 function buildBodySVG(counts,max,highlight){
-  const sk='#0A1018';
+  const sk='#182438';
   const front=bodyPaths('front',counts,max,highlight);
   const back=bodyPaths('back',counts,max,highlight);
   const glowF=`<filter id="glow" x="-50%" y="-30%" width="200%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
-  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2C3D50"/><stop offset="30%" stop-color="#7A4840"/><stop offset="65%" stop-color="#CC3022"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
+  const legGrad=highlight?'':`<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4A5A6A"/><stop offset="25%" stop-color="#E8B4A8"/><stop offset="65%" stop-color="#D04030"/><stop offset="100%" stop-color="#E83828"/></linearGradient>`;
   const legend=highlight?'':`<rect x="50" y="484" width="210" height="7" rx="3.5" fill="url(#lg)"/><text x="50" y="502" font-size="10" fill="#5A6878" font-family="system-ui">0</text><text x="260" y="502" font-size="10" fill="#5A6878" font-family="system-ui" text-anchor="end">≥${Math.max(max,8)} séries/sem</text>`;
   const h=highlight?450:512;
   return`<svg viewBox="0 0 310 ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
