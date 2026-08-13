@@ -607,6 +607,30 @@ function renderProgresso(){
 function renderContent(){switch(S.tab){case'painel':return renderPainel();case'treino':return renderTreino();case'musculos':return renderMusculos();case'dieta':return renderDieta();case'progresso':return renderProgresso();}}
 function mount(){document.getElementById('bnav').innerHTML=renderNav();const c=document.getElementById('content');c.innerHTML=renderContent();c.classList.remove('tab-anim');requestAnimationFrame(()=>c.classList.add('tab-anim'));}
 function remountContent(){document.getElementById('content').innerHTML=renderContent();}
+// Cache de instruções dos exercícios (free-exercise-db)
+const _EXDB_URL='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
+const _EXDB_KEY='exdb_v1';
+let _exdbPromise=null;
+function _loadExDB(){
+  if(_exdbPromise)return _exdbPromise;
+  _exdbPromise=new Promise((res,rej)=>{
+    try{
+      const cached=JSON.parse(localStorage.getItem(_EXDB_KEY)||'null');
+      if(cached){res(cached);return;}
+    }catch(e){}
+    fetch(_EXDB_URL)
+      .then(r=>r.json())
+      .then(all=>{
+        const needed=new Set(Object.values(EX_GIF));
+        const cache={};
+        all.forEach(ex=>{if(needed.has(ex.id)&&ex.instructions?.length)cache[ex.id]=ex.instructions;});
+        try{localStorage.setItem(_EXDB_KEY,JSON.stringify(cache));}catch(e){}
+        res(cache);
+      })
+      .catch(e=>{_exdbPromise=null;rej(e);});
+  });
+  return _exdbPromise;
+}
 function openDetail(exId,dayId){
   const exs=WORKOUTS[dayId]||[];const ex=exs.find(e=>e.id===exId);if(!ex)return;
   S.detailEx=exId;S.detailDay=dayId;
@@ -624,30 +648,20 @@ function openDetail(exId,dayId){
   }
   renderDetailSets();document.getElementById('ex-detail').classList.add('open');
   detailTimer={rem:null,iid:null};document.getElementById('ed-timer-num').textContent='90s';document.getElementById('ed-timer-btn').textContent='Iniciar';
-  // Busca descrição na wger.de
+  // Mostra instruções do exercício (free-exercise-db, cache localStorage)
   const _descEl=document.getElementById('ed-desc');
   if(_descEl){
-    _descEl.innerHTML='<div class="ex-desc-loading">Carregando...</div>';
-    const _qn=encodeURIComponent(ex.n);
-    fetch('https://wger.de/api/v2/exercise/search/?term='+_qn+'&language=pt&format=json')
-      .then(r=>r.json())
-      .then(d=>{
-        const _id=d?.suggestions?.[0]?.data?.base_id||d?.suggestions?.[0]?.data?.id;
-        if(!_id){_descEl.innerHTML='';return Promise.reject('no-id');}
-        return fetch('https://wger.de/api/v2/exerciseinfo/'+_id+'/?format=json').then(r=>r.json());
-      })
-      .then(info=>{
-        // Tenta pt-BR (18), pt (14) ou en (2)
-        const _tr=info.translations?.find(t=>t.language===18)||info.translations?.find(t=>t.language===14)||info.translations?.find(t=>t.language===2);
-        const _raw=(_tr?.description||'').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').trim();
-        if(!_raw){_descEl.innerHTML='';return;}
-        const _ps=_raw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
-        const _body=_ps.length>1
-          ?_ps.map((s,i)=>'<div class="ex-desc-step"><div class="ex-desc-num">'+(i+1)+'</div><div>'+s+'</div></div>').join('')
-          :'<p style="font-size:.8rem;line-height:1.6;margin:0">'+_raw+'</p>';
+    _descEl.innerHTML='';
+    const _gid=EX_GIF[exId];
+    if(_gid){
+      _descEl.innerHTML='<div class="ex-desc-loading">Carregando instruções...</div>';
+      _loadExDB().then(db=>{
+        const _steps=db[_gid];
+        if(!_steps||!_steps.length){_descEl.innerHTML='';return;}
+        const _body=_steps.map((s,i)=>'<div class="ex-desc-step"><div class="ex-desc-num">'+(i+1)+'</div><div>'+s+'</div></div>').join('');
         _descEl.innerHTML='<div class="ex-desc"><div class="ex-desc-title">Como Fazer</div>'+_body+'</div>';
-      })
-      .catch(()=>{_descEl.innerHTML='';});
+      }).catch(()=>{_descEl.innerHTML='';});
+    }
   }
 }
 function renderDetailSets(){const skey=`workout:${todayISO()}:${S.detailDay}`;const log=DB.get(skey)||{};const sets=log[S.detailEx]?.sets||[];const done=sets.filter(s=>s.done).length;document.getElementById('ed-sets-done').textContent=`${done}/${sets.length} séries`;document.getElementById('ed-sets-list').innerHTML=sets.map((s,i)=>`<div class="set-row"><span class="set-n">Série ${i+1}</span><input class="set-in" type="number" inputmode="decimal" placeholder="kg" value="${s.kg||''}" data-set-kg="${i}"><input class="set-in" type="number" inputmode="numeric" placeholder="reps" value="${s.reps||''}" data-set-reps="${i}"><button class="set-done-btn${s.done?' on':''}" data-set-done="${i}">${s.done?chkSvg(13):''}</button></div>`).join('');}
